@@ -40,11 +40,11 @@
     <TypeScriptCompile Include="ts\Graphics\CanvasElement.ts" />
     <TypeScriptCompile Include="ts\Graphics\Color.ts" />
     <TypeScriptCompile Include="ts\Includes.ts" />
-    <TypeScriptCompile Include="ts\Math\Vector.ts" />
+    <TypeScriptCompile Include="ts\Mathematics\Vector2.ts" />
+    <TypeScriptCompile Include="ts\Mathematics\Vector3.ts" />
+    <TypeScriptCompile Include="ts\Mathematics\Vector.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="js\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>
@@ -78,7 +78,6 @@
     <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
     <TypeScriptModuleKind>none</TypeScriptModuleKind>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptMapRoot />
     <TypeScriptOutFile>$(ProjectDir)js/CP.js</TypeScriptOutFile>
     <TypeScriptOutDir>$(ProjectDir)js</TypeScriptOutDir>
   </PropertyGroup>
