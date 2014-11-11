@@ -5,7 +5,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
         typescript: {
             base: {
-                src: ['ts/**/*.ts', '!ts/typings/**/*.*'],
+                src: ['ts/**/*.ts'],
                 dest: 'js/CP.js',
                 options: {
                     module: 'amd', //or commonjs
@@ -13,7 +13,7 @@ module.exports = function (grunt) {
                     basePath: 'ts',
                     sourceMap: false,
                     declaration: true,
-                    comments: true
+                    comments: false
                 }
             }
         },
