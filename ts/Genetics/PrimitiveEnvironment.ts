@@ -4,14 +4,14 @@ module CP.Genetics {
     export class PrimitiveEnvironment extends Environment<PrimitiveOrganism> implements Graphics.CanvasElement {        
         static EnergyInflowRate = 0.03;
         static MinOrganismPopulation = 100;
-        size: Vector;
+        size: Mathematics.Vector2;
         availableEnergyDensity: number = 0;
         onExecute: () => void;
         private neighbourLookup: number[];
         private neighbourDistances: number[];
         private neighbourPairs: NeighbourPair[];
 
-        constructor(size:Vector) {
+        constructor(size: Mathematics.Vector2) {
             super();
             this.size = size;
         }
@@ -74,7 +74,7 @@ module CP.Genetics {
             this.onExecute();
         }
 
-        getEnergy(location: Vector) {
+        getEnergy(location: Mathematics.Vector2) {
             return this.availableEnergyDensity;
         }
 
@@ -89,14 +89,14 @@ module CP.Genetics {
 
         spawnOrganism() {
             var organism = new CP.Genetics.PrimitiveOrganism(this);
-            organism.location = new CP.Vector(Math.random() * this.size.x, Math.random() * this.size.y);
+            organism.location = new Mathematics.Vector2(Math.random() * this.size.x, Math.random() * this.size.y);
             organism.size = Math.random();
             this.addOrganism(organism);
             return organism;
         }
 
-        computeNewLocation(location: Vector, velocity: Vector) {
-            var newLocation = new Vector(location.x + velocity.x, location.y + velocity.y);
+        computeNewLocation(location: Mathematics.Vector2, velocity: Mathematics.Vector2) {
+            var newLocation = new Mathematics.Vector2(location.x + velocity.x, location.y + velocity.y);
 
             if (newLocation.x < 0)
                 newLocation.x += this.size.x;
@@ -111,7 +111,7 @@ module CP.Genetics {
             return newLocation;
         }
 
-        private getEnvironmentIndex(location: Vector) {
+        private getEnvironmentIndex(location: Mathematics.Vector2) {
             return location.x * location.y + location.x;
         }
 

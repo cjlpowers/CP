@@ -28,18 +28,18 @@ declare module CP.Genetics {
     class PrimitiveEnvironment extends Environment<PrimitiveOrganism> implements Graphics.CanvasElement {
         static EnergyInflowRate: number;
         static MinOrganismPopulation: number;
-        size: Vector;
+        size: Mathematics.Vector2;
         availableEnergyDensity: number;
         onExecute: () => void;
         private neighbourLookup;
         private neighbourDistances;
         private neighbourPairs;
-        constructor(size: Vector);
+        constructor(size: Mathematics.Vector2);
         execute(): void;
-        getEnergy(location: Vector): number;
+        getEnergy(location: Mathematics.Vector2): number;
         getNeighbour(organism: PrimitiveOrganism): PrimitiveOrganism;
         spawnOrganism(): PrimitiveOrganism;
-        computeNewLocation(location: Vector, velocity: Vector): Vector;
+        computeNewLocation(location: Mathematics.Vector2, velocity: Mathematics.Vector2): Mathematics.Vector2;
         private getEnvironmentIndex(location);
         render(ctx: CanvasRenderingContext2D): void;
         private computeNeighbours();
@@ -80,8 +80,8 @@ declare module CP.Genetics {
         size: number;
         energy: number;
         age: number;
-        location: Vector;
-        velocity: Vector;
+        location: Mathematics.Vector2;
+        velocity: Mathematics.Vector2;
         aggression: number;
         environment: PrimitiveEnvironment;
         feedEnergy: number;
@@ -127,16 +127,33 @@ declare module CP.Graphics {
         toString(): string;
     }
 }
-declare module CP {
+declare module CP.Mathematics {
     class Vector {
+        private components;
+        private magnitudeValue;
+        constructor(components: number[]);
+        magnitude(): number;
+        isZero(): boolean;
+        getComponent(n: number): number;
+        getDimensions(): number;
+    }
+}
+declare module CP.Mathematics {
+    class Vector2 extends Vector {
+        constructor(x?: number, y?: number);
+        x: number;
+        y: number;
+        add(vector: Vector2): Vector2;
+        subtract(vector: Vector2): Vector2;
+    }
+}
+declare module CP.Mathematics {
+    class Vector3 extends Vector {
+        constructor(x?: number, y?: number, z?: number);
         x: number;
         y: number;
         z: number;
-        private magnitudeValue;
-        constructor(x?: number, y?: number, z?: number);
-        magnitude(): number;
-        add(vector: Vector): Vector;
-        subtract(vector: Vector): Vector;
-        isZero(): boolean;
+        add(vector: Vector3): Vector3;
+        subtract(vector: Vector3): Vector3;
     }
 }

@@ -4,8 +4,8 @@
         size: number;
         energy: number;
         age: number;
-        location: Vector;
-        velocity: Vector;
+        location: Mathematics.Vector2;
+        velocity: Mathematics.Vector2;
         aggression: number;
         environment: PrimitiveEnvironment;
         feedEnergy: number;
@@ -25,8 +25,9 @@
                 this.genome = PrimitiveGenome.generateGenome(this, [<PrimitiveGenome>parent.genome]);
             else
                 this.genome = PrimitiveGenome.generateGenome(this);
-            this.location = new Vector(0, 0);
-            this.velocity = new Vector(0, 0);
+            this.location = new Mathematics.Vector2(0, 0);
+
+            this.velocity = new Mathematics.Vector2(0, 0);
             this.aggression = 0;
             this.isAlive = true;
             this.environment = environment;
@@ -51,7 +52,7 @@
                 if (movementEnergy < this.energy)
                     this.energy -= movementEnergy;
                 else
-                    this.velocity = new Vector(0, 0);
+                    this.velocity = new Mathematics.Vector2(0, 0);
 
                 // compute the energy related to gene length
                 var geneomeEnergy = PrimitiveOrganism.GenomeEnergyFactor * this.genome.getSize() * this.size;

@@ -141,13 +141,13 @@ var CP;
             };
             PrimitiveEnvironment.prototype.spawnOrganism = function () {
                 var organism = new CP.Genetics.PrimitiveOrganism(this);
-                organism.location = new CP.Vector(Math.random() * this.size.x, Math.random() * this.size.y);
+                organism.location = new CP.Mathematics.Vector2(Math.random() * this.size.x, Math.random() * this.size.y);
                 organism.size = Math.random();
                 this.addOrganism(organism);
                 return organism;
             };
             PrimitiveEnvironment.prototype.computeNewLocation = function (location, velocity) {
-                var newLocation = new CP.Vector(location.x + velocity.x, location.y + velocity.y);
+                var newLocation = new CP.Mathematics.Vector2(location.x + velocity.x, location.y + velocity.y);
                 if (newLocation.x < 0)
                     newLocation.x += this.size.x;
                 else if (newLocation.x > this.size.x)
@@ -298,9 +298,9 @@ var CP;
                 var impulse = velocitySensor.getValue() * VelocityGene.ImpulseFactor;
                 var directionValue = directionSensor.getValue();
                 if (directionValue > 0)
-                    organism.velocity = organism.velocity.add(new CP.Vector(impulse, 0));
+                    organism.velocity = organism.velocity.add(new CP.Mathematics.Vector2(impulse, 0));
                 else if (directionValue < 0)
-                    organism.velocity = organism.velocity.add(new CP.Vector(0, impulse));
+                    organism.velocity = organism.velocity.add(new CP.Mathematics.Vector2(0, impulse));
                 else
                     return;
                 organism.velocity.x = this.normalize(organism.velocity.x, -1, 1);
@@ -393,9 +393,7 @@ var CP;
                     var spawn = new Genetics.PrimitiveOrganism(environment, organism);
                     spawn.energy = spawnEnergy;
                     spawn.size = spawnSize;
-                    //spawn.location.x = organism.location.x;
-                    //spawn.location.y = organism.location.y;
-                    spawn.location = new CP.Vector(Math.random() * environment.size.x, Math.random() * environment.size.y);
+                    spawn.location = new CP.Mathematics.Vector2(Math.random() * environment.size.x, Math.random() * environment.size.y);
                     environment.addOrganism(spawn);
                 }
             };
@@ -507,8 +505,8 @@ var CP;
                     this.genome = Genetics.PrimitiveGenome.generateGenome(this, [parent.genome]);
                 else
                     this.genome = Genetics.PrimitiveGenome.generateGenome(this);
-                this.location = new CP.Vector(0, 0);
-                this.velocity = new CP.Vector(0, 0);
+                this.location = new CP.Mathematics.Vector2(0, 0);
+                this.velocity = new CP.Mathematics.Vector2(0, 0);
                 this.aggression = 0;
                 this.isAlive = true;
                 this.environment = environment;
@@ -529,7 +527,7 @@ var CP;
                     if (movementEnergy < this.energy)
                         this.energy -= movementEnergy;
                     else
-                        this.velocity = new CP.Vector(0, 0);
+                        this.velocity = new CP.Mathematics.Vector2(0, 0);
                     // compute the energy related to gene length
                     var geneomeEnergy = PrimitiveOrganism.GenomeEnergyFactor * this.genome.getSize() * this.size;
                     this.energy -= geneomeEnergy;
@@ -708,30 +706,113 @@ var CP;
 })(CP || (CP = {}));
 var CP;
 (function (CP) {
-    var Vector = (function () {
-        function Vector(x, y, z) {
-            if (x === void 0) { x = 0; }
-            if (y === void 0) { y = 0; }
-            if (z === void 0) { z = 0; }
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-        Vector.prototype.magnitude = function () {
-            if (this.magnitudeValue === undefined)
-                this.magnitudeValue = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-            return this.magnitudeValue;
-        };
-        Vector.prototype.add = function (vector) {
-            return new Vector(this.x + vector.x, this.y + vector.y, this.z + vector.z);
-        };
-        Vector.prototype.subtract = function (vector) {
-            return new Vector(this.x - vector.x, this.y - vector.y, this.z - vector.z);
-        };
-        Vector.prototype.isZero = function () {
-            return this.x == 0 && this.y == 0;
-        };
-        return Vector;
-    })();
-    CP.Vector = Vector;
+    var Mathematics;
+    (function (Mathematics) {
+        var Vector = (function () {
+            function Vector(components) {
+                this.components = components;
+            }
+            Vector.prototype.magnitude = function () {
+                if (this.magnitudeValue === undefined) {
+                    this.magnitudeValue = Math.sqrt(this.components.reduce(function (prev, current) {
+                        return prev + current * current;
+                    }, 0));
+                }
+                return this.magnitudeValue;
+            };
+            Vector.prototype.isZero = function () {
+                return this.components.every(function (value) {
+                    return value === 0;
+                });
+            };
+            Vector.prototype.getComponent = function (n) {
+                return this.components[n];
+            };
+            Vector.prototype.getDimensions = function () {
+                return this.components.length;
+            };
+            return Vector;
+        })();
+        Mathematics.Vector = Vector;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+var CP;
+(function (CP) {
+    var Mathematics;
+    (function (Mathematics) {
+        var Vector2 = (function (_super) {
+            __extends(Vector2, _super);
+            function Vector2(x, y) {
+                if (x === void 0) { x = 0; }
+                if (y === void 0) { y = 0; }
+                _super.call(this, [x, y]);
+            }
+            Object.defineProperty(Vector2.prototype, "x", {
+                get: function () {
+                    return this.getComponent(0);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Vector2.prototype, "y", {
+                get: function () {
+                    return this.getComponent(1);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Vector2.prototype.add = function (vector) {
+                return new Vector2(this.x + vector.x, this.y + vector.y);
+            };
+            Vector2.prototype.subtract = function (vector) {
+                return new Vector2(this.x - vector.x, this.y - vector.y);
+            };
+            return Vector2;
+        })(Mathematics.Vector);
+        Mathematics.Vector2 = Vector2;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+var CP;
+(function (CP) {
+    var Mathematics;
+    (function (Mathematics) {
+        var Vector3 = (function (_super) {
+            __extends(Vector3, _super);
+            function Vector3(x, y, z) {
+                if (x === void 0) { x = 0; }
+                if (y === void 0) { y = 0; }
+                if (z === void 0) { z = 0; }
+                _super.call(this, [x, y, z]);
+            }
+            Object.defineProperty(Vector3.prototype, "x", {
+                get: function () {
+                    return this.getComponent(0);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Vector3.prototype, "y", {
+                get: function () {
+                    return this.getComponent(1);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Vector3.prototype, "z", {
+                get: function () {
+                    return this.getComponent(2);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Vector3.prototype.add = function (vector) {
+                return new Vector3(this.x + vector.x, this.y + vector.y, this.z + vector.z);
+            };
+            Vector3.prototype.subtract = function (vector) {
+                return new Vector3(this.x - vector.x, this.y - vector.y, this.z - vector.z);
+            };
+            return Vector3;
+        })(Mathematics.Vector);
+        Mathematics.Vector3 = Vector3;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
 })(CP || (CP = {}));

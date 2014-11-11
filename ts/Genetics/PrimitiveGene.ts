@@ -93,9 +93,9 @@ module CP.Genetics {
             var impulse = velocitySensor.getValue() * VelocityGene.ImpulseFactor;
             var directionValue = directionSensor.getValue();
             if (directionValue > 0)
-                organism.velocity = organism.velocity.add(new Vector(impulse, 0));
+                organism.velocity = organism.velocity.add(new Mathematics.Vector2(impulse, 0));
             else if (directionValue < 0)
-                organism.velocity = organism.velocity.add(new Vector(0, impulse));
+                organism.velocity = organism.velocity.add(new Mathematics.Vector2(0, impulse));
             else
                 return;
 
@@ -203,9 +203,7 @@ module CP.Genetics {
                 var spawn = new PrimitiveOrganism(environment, organism);
                 spawn.energy = spawnEnergy;
                 spawn.size = spawnSize;
-                //spawn.location.x = organism.location.x;
-                //spawn.location.y = organism.location.y;
-                spawn.location = new CP.Vector(Math.random() * environment.size.x, Math.random() * environment.size.y);
+                spawn.location = new Mathematics.Vector2(Math.random() * environment.size.x, Math.random() * environment.size.y);
                 environment.addOrganism(spawn);
             }
         }
