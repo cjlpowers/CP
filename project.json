@@ -1,0 +1,30 @@
+﻿{
+    /* Click to learn more about project.json  http://go.microsoft.com/fwlink/?LinkID=517074 */
+    "webroot": "",
+    "version": "1.0.0-*",
+    "dependencies": {
+    },
+    "commands": {
+        /* Change the port number when you are self hosting this application */
+        "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://localhost:5000",
+        "gen": "Microsoft.Framework.CodeGeneration"
+    },
+    "frameworks": {
+    },
+    "exclude": [
+        "wwwroot",
+        "node_modules",
+        "bower_components"
+    ],
+    "packExclude": [
+        "node_modules",
+        "bower_components",
+        "**.kproj",
+        "**.user",
+        "**.vspscc"
+    ],
+    "scripts": {
+        "postrestore": [ "npm install" ],
+        "prepare": [ "npm install" ]
+    }
+}

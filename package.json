@@ -1,11 +1,11 @@
 {
-   "name":"CP",
-   "version":"1.0.0",
-   "author":"Chris Powers",
-   "devDependencies":{
-      "grunt":"",
-      "grunt-typescript":"",
-      "typescript":"",
-      "grunt-contrib-watch":""
-   }
+  "name": "CP",
+  "version": "1.0.0",
+  "author": "Chris Powers",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-watch": "",
+    "grunt-typescript": "",
+    "typescript": ""
+  }
 }
