@@ -1,7 +1,7 @@
 ﻿/// <reference path="../Includes.ts" />
 
 module CP.Mechanical {
-    export class Structure<T extends Element> extends Element{
+    export class Structure<T extends Element> extends Element implements Graphics.CanvasElement{
         constructor(public dof: number, protected elements: Array<T>, nodes: Array<Node>) {
             super(Material.Aluminium);
             this.nodes = nodes;
@@ -158,6 +158,16 @@ module CP.Mechanical {
             // compute reaction
             this.calculateReactionDisplacements(globalQ);
             this.calculateReactionForces(globalK, globalQ);
+        }
+
+        public render(ctx: CanvasRenderingContext2D) {
+            this.nodes.forEach((node) => {
+                node.render(ctx);
+            });
+
+            this.elements.forEach((element) => {
+                element.render(ctx);
+            });
         }
     }
 }

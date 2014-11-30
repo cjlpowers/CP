@@ -180,7 +180,7 @@ declare module CP.Mechanical {
     }
 }
 declare module CP.Mechanical {
-    class Node {
+    class Node implements Graphics.CanvasElement {
         number: number;
         force: Mathematics.Vector3;
         position: Mathematics.Vector3;
@@ -188,10 +188,11 @@ declare module CP.Mechanical {
         reactionForce: Mathematics.Vector3;
         reactionDisplacement: Mathematics.Vector3;
         constructor(number: number);
+        render(ctx: CanvasRenderingContext2D): void;
     }
 }
 declare module CP.Mechanical {
-    class Element {
+    class Element implements Graphics.CanvasElement {
         material: Material;
         nodes: Node[];
         number: number;
@@ -200,6 +201,7 @@ declare module CP.Mechanical {
         calcualteTransformMatrix(): Mathematics.Matrix;
         calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
         calcualteLocalDisplacementMatrix(): Mathematics.Matrix;
+        render(ctx: CanvasRenderingContext2D): void;
     }
 }
 declare module CP {
@@ -231,7 +233,7 @@ declare module CP.Mathematics {
     }
 }
 declare module CP.Mechanical {
-    class Structure<T extends Element> extends Element {
+    class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
         dof: number;
         protected elements: T[];
         constructor(dof: number, elements: T[], nodes: Node[]);
@@ -241,6 +243,7 @@ declare module CP.Mechanical {
         calculateReactionDisplacements(globalQ: Mathematics.Matrix): void;
         calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix): void;
         solve(): void;
+        render(ctx: CanvasRenderingContext2D): void;
     }
 }
 declare module CP.Mechanical {

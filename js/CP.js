@@ -917,6 +917,18 @@ var CP;
                 this.reactionForce.z = undefined;
                 this.reactionForce.unit = "N";
             }
+            Node.prototype.render = function (ctx) {
+                var fillColor = new CP.Graphics.Color(100, 100, 100);
+                var lineColor = new CP.Graphics.Color(0, 0, 0);
+                var size = 1;
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, size, 0, 2 * Math.PI);
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = lineColor;
+                ctx.stroke();
+            };
             return Node;
         })();
         Mechanical.Node = Node;
@@ -945,6 +957,17 @@ var CP;
                 var transformMatrix = this.calcualteTransformMatrix();
                 var globalDisplacementMatrix = this.calcualteGlobalDisplacementMatrix();
                 return transformMatrix.multiply(globalDisplacementMatrix);
+            };
+            Element.prototype.render = function (ctx) {
+                var fillColor = new CP.Graphics.Color(100, 100, 100);
+                var lineColor = new CP.Graphics.Color(0, 0, 0);
+                var size = 1;
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = lineColor;
+                ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
+                ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
+                ctx.stroke();
             };
             return Element;
         })();
@@ -1214,6 +1237,14 @@ var CP;
                 // compute reaction
                 this.calculateReactionDisplacements(globalQ);
                 this.calculateReactionForces(globalK, globalQ);
+            };
+            Structure.prototype.render = function (ctx) {
+                this.nodes.forEach(function (node) {
+                    node.render(ctx);
+                });
+                this.elements.forEach(function (element) {
+                    element.render(ctx);
+                });
             };
             return Structure;
         })(Mechanical.Element);
