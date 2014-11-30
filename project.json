@@ -13,10 +13,12 @@
     },
     "exclude": [
         "wwwroot",
+        "js",
         "node_modules",
         "bower_components"
     ],
     "packExclude": [
+        "js",
         "node_modules",
         "bower_components",
         "**.kproj",

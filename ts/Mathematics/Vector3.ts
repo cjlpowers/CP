@@ -9,13 +9,22 @@ module CP.Mathematics {
         get x(): number {
             return this.getComponent(0);
         }
+        set x(value:number) {
+            this.setComponent(0, value);
+        }
 
         get y(): number {
             return this.getComponent(1);
         }
+        set y(value: number) {
+            this.setComponent(1, value);
+        }
 
         get z(): number {
             return this.getComponent(2);
+        }
+        set z(value: number) {
+            this.setComponent(2, value);
         }
 
         add(vector: Vector3) : Vector3 {

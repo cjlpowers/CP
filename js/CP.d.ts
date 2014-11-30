@@ -128,14 +128,25 @@ declare module CP.Graphics {
     }
 }
 declare module CP.Mathematics {
+    class Value {
+        magnitude: number;
+        unit: string;
+        constructor(magnitude: number, unit?: string);
+        toString(): string;
+    }
+}
+declare module CP.Mathematics {
     class Vector {
         private components;
         private magnitudeValue;
+        unit: string;
         constructor(components: number[]);
         magnitude(): number;
         isZero(): boolean;
         getComponent(n: number): number;
+        protected setComponent(n: number, value: number): void;
         getDimensions(): number;
+        toString(): string;
     }
 }
 declare module CP.Mathematics {
@@ -155,5 +166,98 @@ declare module CP.Mathematics {
         z: number;
         add(vector: Vector3): Vector3;
         subtract(vector: Vector3): Vector3;
+    }
+}
+declare module CP.Mechanical {
+    class Material {
+        name: string;
+        elasticModulus: Mathematics.Value;
+        static Aluminium: Material;
+        static Steel: Material;
+        static Glass: Material;
+        constructor(name: string, elasticModulus: Mathematics.Value);
+        toString(): string;
+    }
+}
+declare module CP.Mechanical {
+    class Node {
+        number: number;
+        force: Mathematics.Vector3;
+        position: Mathematics.Vector3;
+        displacement: Mathematics.Vector3;
+        reactionForce: Mathematics.Vector3;
+        reactionDisplacement: Mathematics.Vector3;
+        constructor(number: number);
+    }
+}
+declare module CP.Mechanical {
+    class Element {
+        material: Material;
+        nodes: Node[];
+        number: number;
+        constructor(material: Material);
+        calculateStiffnessMatrix(): Mathematics.Matrix;
+        calcualteTransformMatrix(): Mathematics.Matrix;
+        calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
+        calcualteLocalDisplacementMatrix(): Mathematics.Matrix;
+    }
+}
+declare module CP {
+    class Log {
+        static debug(message?: any, ...optionalParams: any[]): void;
+        static log(message?: any, ...optionalParams: any[]): void;
+        static info(message?: any, ...optionalParams: any[]): void;
+        static warn(message?: any, ...optionalParams: any[]): void;
+        static error(message?: any, ...optionalParams: any[]): void;
+    }
+}
+declare var numeric: any;
+declare module CP.Mathematics {
+    class Matrix {
+        matrix: any;
+        rowCount: number;
+        columnCount: number;
+        constructor(matrix: any);
+        toString(): string;
+        getValue(row: number, column: number): number;
+        setValue(row: number, column: number, value: number): void;
+        addValue(row: number, column: number, value: number): void;
+        multiply(b: Matrix): Matrix;
+        scale(multiplier: number): Matrix;
+        inverse(): Matrix;
+        clone(): Matrix;
+        static new(rows: number, cols: number): Matrix;
+        static solveAxEqualsB(a: Matrix, b: Matrix): Matrix;
+    }
+}
+declare module CP.Mechanical {
+    class Structure<T extends Element> extends Element {
+        dof: number;
+        protected elements: T[];
+        constructor(dof: number, elements: T[], nodes: Node[]);
+        calculateStiffnessMatrix(): Mathematics.Matrix;
+        calculateForceMatrix(): Mathematics.Matrix;
+        calculateDisplacementMatrix(globalK: Mathematics.Matrix, globalF: Mathematics.Matrix): Mathematics.Matrix;
+        calculateReactionDisplacements(globalQ: Mathematics.Matrix): void;
+        calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix): void;
+        solve(): void;
+    }
+}
+declare module CP.Mechanical {
+    class TrussElement extends Element {
+        area: Mathematics.Value;
+        length: number;
+        coefficient: number;
+        constructor(material: Material, area: Mathematics.Value, node1: Node, node2: Node);
+        calculateCoefficientMatrix(): Mathematics.Matrix;
+        calculateStiffnessMatrix(): Mathematics.Matrix;
+        calcualteTransformMatrix(): Mathematics.Matrix;
+        calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
+    }
+}
+declare module CP.Mechanical {
+    class TrussStructure extends Structure<TrussElement> {
+        dof: number;
+        constructor(dof: number, elements: TrussElement[], nodes: Node[]);
     }
 }

@@ -708,6 +708,27 @@ var CP;
 (function (CP) {
     var Mathematics;
     (function (Mathematics) {
+        var Value = (function () {
+            function Value(magnitude, unit) {
+                if (unit === void 0) { unit = ""; }
+                this.magnitude = magnitude;
+                this.unit = unit;
+            }
+            Value.prototype.toString = function () {
+                if (this.unit)
+                    return this.magnitude.toString() + ' ' + this.unit;
+                else
+                    return this.magnitude.toString();
+            };
+            return Value;
+        })();
+        Mathematics.Value = Value;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+var CP;
+(function (CP) {
+    var Mathematics;
+    (function (Mathematics) {
         var Vector = (function () {
             function Vector(components) {
                 this.components = components;
@@ -715,7 +736,7 @@ var CP;
             Vector.prototype.magnitude = function () {
                 if (this.magnitudeValue === undefined) {
                     this.magnitudeValue = Math.sqrt(this.components.reduce(function (prev, current) {
-                        return prev + current * current;
+                        return prev + (current ? current * current : 0);
                     }, 0));
                 }
                 return this.magnitudeValue;
@@ -728,8 +749,24 @@ var CP;
             Vector.prototype.getComponent = function (n) {
                 return this.components[n];
             };
+            Vector.prototype.setComponent = function (n, value) {
+                this.components[n] = value;
+            };
             Vector.prototype.getDimensions = function () {
                 return this.components.length;
+            };
+            Vector.prototype.toString = function () {
+                var str = '[';
+                var dimensions = this.getDimensions();
+                for (var i = 0; i < dimensions; i++) {
+                    str = str + this.getComponent(i);
+                    if (i < dimensions - 1)
+                        str = str + ', ';
+                }
+                str = str + ']';
+                if (this.unit)
+                    str = str + ' ' + this.unit;
+                return str;
             };
             return Vector;
         })();
@@ -788,6 +825,9 @@ var CP;
                 get: function () {
                     return this.getComponent(0);
                 },
+                set: function (value) {
+                    this.setComponent(0, value);
+                },
                 enumerable: true,
                 configurable: true
             });
@@ -795,12 +835,18 @@ var CP;
                 get: function () {
                     return this.getComponent(1);
                 },
+                set: function (value) {
+                    this.setComponent(1, value);
+                },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(Vector3.prototype, "z", {
                 get: function () {
                     return this.getComponent(2);
+                },
+                set: function (value) {
+                    this.setComponent(2, value);
                 },
                 enumerable: true,
                 configurable: true
@@ -815,4 +861,470 @@ var CP;
         })(Mathematics.Vector);
         Mathematics.Vector3 = Vector3;
     })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var Material = (function () {
+            function Material(name, elasticModulus) {
+                this.name = name;
+                this.elasticModulus = elasticModulus;
+            }
+            Material.prototype.toString = function () {
+                return this.name.toString() + ' (' + this.elasticModulus.toString() + ')';
+            };
+            Material.Aluminium = new Material("Aluminium", new CP.Mathematics.Value(69, "GPa"));
+            Material.Steel = new Material("Steel", new CP.Mathematics.Value(200, "GPa"));
+            Material.Glass = new Material("Glass", new CP.Mathematics.Value(72, "GPa"));
+            return Material;
+        })();
+        Mechanical.Material = Material;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var Node = (function () {
+            function Node(number) {
+                this.number = number;
+                this.force = new CP.Mathematics.Vector3();
+                this.force.x = undefined;
+                this.force.y = undefined;
+                this.force.z = undefined;
+                this.force.unit = "N";
+                this.position = new CP.Mathematics.Vector3();
+                this.position.x = undefined;
+                this.position.y = undefined;
+                this.position.z = undefined;
+                this.position.unit = "m";
+                this.displacement = new CP.Mathematics.Vector3();
+                this.displacement.x = undefined;
+                this.displacement.y = undefined;
+                this.displacement.z = undefined;
+                this.displacement.unit = "m";
+                this.reactionDisplacement = new CP.Mathematics.Vector3();
+                this.reactionDisplacement.x = undefined;
+                this.reactionDisplacement.y = undefined;
+                this.reactionDisplacement.z = undefined;
+                this.reactionDisplacement.unit = "m";
+                this.reactionForce = new CP.Mathematics.Vector3();
+                this.reactionForce.x = undefined;
+                this.reactionForce.y = undefined;
+                this.reactionForce.z = undefined;
+                this.reactionForce.unit = "N";
+            }
+            return Node;
+        })();
+        Mechanical.Node = Node;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var Element = (function () {
+            function Element(material) {
+                this.material = material;
+                this.nodes = new Array();
+            }
+            Element.prototype.calculateStiffnessMatrix = function () {
+                throw new Error("Not implemented");
+            };
+            Element.prototype.calcualteTransformMatrix = function () {
+                throw new Error("Not implemented");
+            };
+            Element.prototype.calcualteGlobalDisplacementMatrix = function () {
+                throw new Error("Not implemented");
+            };
+            Element.prototype.calcualteLocalDisplacementMatrix = function () {
+                var transformMatrix = this.calcualteTransformMatrix();
+                var globalDisplacementMatrix = this.calcualteGlobalDisplacementMatrix();
+                return transformMatrix.multiply(globalDisplacementMatrix);
+            };
+            return Element;
+        })();
+        Mechanical.Element = Element;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
+})(CP || (CP = {}));
+/// <reference path="Includes.ts" />
+var CP;
+(function (CP) {
+    var Log = (function () {
+        function Log() {
+        }
+        Log.debug = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.debug || Log.log)(message, optionalParams);
+        };
+        Log.log = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            console.log(message, optionalParams);
+        };
+        Log.info = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.info || Log.log)(message, optionalParams);
+        };
+        Log.warn = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.warn || Log.log)(message, optionalParams);
+        };
+        Log.error = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.error || Log.log)(message, optionalParams);
+        };
+        return Log;
+    })();
+    CP.Log = Log;
+})(CP || (CP = {}));
+/// <reference path="Mathematics/Value.ts" />
+/// <reference path="Mathematics/Vector.ts" />
+/// <reference path="Mathematics/Vector2.ts" />
+/// <reference path="Mathematics/Vector3.ts" />
+/// <reference path="Mechanical/Material.ts" />
+/// <reference path="Mechanical/Node.ts" />
+/// <reference path="Mechanical/Element.ts" />
+/// <reference path="Log.ts" />
+var numeric;
+var CP;
+(function (CP) {
+    var Mathematics;
+    (function (Mathematics) {
+        var Matrix = (function () {
+            function Matrix(matrix) {
+                this.matrix = matrix;
+                if (!matrix) {
+                    throw new Error("Must provide a matrix");
+                }
+                this.rowCount = matrix.length;
+                this.columnCount = this.rowCount > 0 ? matrix[0].length : 0;
+            }
+            Object.defineProperty(Matrix.prototype, "rowCount", {
+                get: function () {
+                    return this.matrix.length;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Matrix.prototype, "columnCount", {
+                get: function () {
+                    return this.matrix.length > 0 ? this.matrix[0].length : 0;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Matrix.prototype.toString = function () {
+                return this.matrix.toString();
+            };
+            Matrix.prototype.getValue = function (row, column) {
+                var obj = this.matrix[row];
+                if (column === 0 && !Array.isArray(obj))
+                    return obj;
+                return obj[column];
+            };
+            Matrix.prototype.setValue = function (row, column, value) {
+                this.matrix[row][column] = value;
+            };
+            Matrix.prototype.addValue = function (row, column, value) {
+                this.setValue(row, column, this.getValue(row, column) + value);
+            };
+            Matrix.prototype.multiply = function (b) {
+                return new Matrix(numeric.dot(this.matrix, b.matrix));
+            };
+            Matrix.prototype.scale = function (multiplier) {
+                return new Matrix(numeric.mul(multiplier, this.matrix));
+            };
+            Matrix.prototype.inverse = function () {
+                return new Matrix(numeric.inv(this.matrix));
+            };
+            Matrix.prototype.clone = function () {
+                return this.scale(1);
+            };
+            Matrix.new = function (rows, cols) {
+                var result = new Array(rows);
+                for (var r = 0; r < rows; r++) {
+                    result[r] = new Array(cols);
+                    for (var c = 0; c < cols; c++)
+                        result[r][c] = 0;
+                }
+                return new Matrix(result);
+            };
+            Matrix.solveAxEqualsB = function (a, b) {
+                return new CP.Mathematics.Matrix(numeric.solve(a.matrix, b.matrix));
+            };
+            return Matrix;
+        })();
+        Mathematics.Matrix = Matrix;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var Structure = (function (_super) {
+            __extends(Structure, _super);
+            function Structure(dof, elements, nodes) {
+                _super.call(this, Mechanical.Material.Aluminium);
+                this.dof = dof;
+                this.elements = elements;
+                this.nodes = nodes;
+            }
+            Structure.prototype.calculateStiffnessMatrix = function () {
+                var k = CP.Mathematics.Matrix.new(this.nodes.length * this.dof, this.nodes.length * this.dof);
+                for (var e = 0; e < this.elements.length; e++) {
+                    var element = this.elements[e];
+                    var elementK = element.calculateStiffnessMatrix();
+                    for (var i = 0; i < element.nodes.length; i++) {
+                        var globalNumber = element.nodes[i].number - 1;
+                        for (var r = 0; r < this.dof; r++) {
+                            for (var c = 0; c < this.dof; c++)
+                                k.addValue(globalNumber * this.dof + r, globalNumber * this.dof + c, elementK.getValue(i * this.dof + r, i * this.dof + c));
+                        }
+                        for (var j = 0; j < element.nodes.length; j++) {
+                            if (j != i) {
+                                var gNumber = element.nodes[j].number - 1;
+                                for (var r = 0; r < this.dof; r++) {
+                                    for (var c = 0; c < this.dof; c++) {
+                                        k.addValue(gNumber * this.dof + r, globalNumber * this.dof + c, elementK.getValue(j * this.dof + r, i * this.dof + c));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return k;
+            };
+            Structure.prototype.calculateForceMatrix = function () {
+                var f = CP.Mathematics.Matrix.new(this.nodes.length * this.dof, 1);
+                for (var r = 0; r < this.nodes.length; r++) {
+                    var n = this.nodes[r];
+                    if (n.force.x !== undefined)
+                        f.setValue(r * this.dof, 0, n.force.x);
+                    if (this.dof >= 2 && n.force.y !== undefined)
+                        f.setValue(r * this.dof + 1, 0, n.force.y);
+                    if (this.dof >= 3 && n.force.z !== undefined)
+                        f.setValue(r * this.dof + 2, 0, n.force.z);
+                }
+                return f;
+            };
+            Structure.prototype.calculateDisplacementMatrix = function (globalK, globalF) {
+                globalK = globalK.clone();
+                globalF = globalF.clone();
+                // now use the penalty approach to apply boundary conditions
+                var coeff = 0;
+                for (var r = 0; r < globalK.rowCount; r++)
+                    for (var c = 0; c < globalK.columnCount; c++)
+                        if (coeff < globalK.getValue(r, c))
+                            coeff = globalK.getValue(r, c);
+                coeff *= 10000;
+                for (var n = 0; n < this.nodes.length; n++) {
+                    var node = this.nodes[n];
+                    var globalNumber = node.number - 1;
+                    if (node.displacement.x !== undefined) {
+                        globalK.addValue(globalNumber * this.dof, globalNumber * this.dof, coeff);
+                        globalF.addValue(globalNumber * this.dof, 0, node.displacement.x * coeff);
+                    }
+                    if (this.dof >= 2 && node.displacement.y !== undefined) {
+                        globalK.addValue(globalNumber * this.dof + 1, globalNumber * this.dof + 1, coeff);
+                        globalF.addValue(globalNumber * this.dof + 1, 0, node.displacement.y * coeff);
+                    }
+                    if (this.dof >= 3 && node.displacement.z !== undefined) {
+                        globalK.addValue(globalNumber * this.dof + 2, globalNumber * this.dof + 2, coeff);
+                        globalF.addValue(globalNumber * this.dof + 2, 0, node.displacement.z * coeff);
+                    }
+                }
+                var globalQ = CP.Mathematics.Matrix.solveAxEqualsB(globalK, globalF);
+                return globalQ;
+            };
+            Structure.prototype.calculateReactionDisplacements = function (globalQ) {
+                var _this = this;
+                this.nodes.forEach(function (node) {
+                    var globalNumber = node.number - 1;
+                    if (_this.dof === 1)
+                        node.reactionDisplacement = new CP.Mathematics.Vector3(globalQ.getValue(globalNumber * _this.dof, 0));
+                    else if (_this.dof === 2)
+                        node.reactionDisplacement = new CP.Mathematics.Vector3(globalQ.getValue(globalNumber * _this.dof, 0), globalQ.getValue(globalNumber * _this.dof + 1, 0));
+                    else if (_this.dof === 3)
+                        node.reactionDisplacement = new CP.Mathematics.Vector3(globalQ.getValue(globalNumber * _this.dof, 0), globalQ.getValue(globalNumber * _this.dof + 1, 0), globalQ.getValue(globalNumber * _this.dof + 2, 0));
+                    else
+                        throw new Error("DOF not supported");
+                });
+            };
+            Structure.prototype.calculateReactionForces = function (globalK, globalQ) {
+                var _this = this;
+                var rowsToRemove = new Array();
+                for (var n = 0; n < this.nodes.length; n++) {
+                    var node = this.nodes[n];
+                    var globalNumber = node.number - 1;
+                    if (node.displacement.x === undefined)
+                        rowsToRemove.push(globalNumber * this.dof);
+                    if (this.dof >= 2 && node.displacement.y === undefined)
+                        rowsToRemove.push(globalNumber * this.dof + 1);
+                    if (this.dof >= 3 && node.displacement.z === undefined)
+                        rowsToRemove.push(globalNumber * this.dof + 2);
+                }
+                // remove the rows
+                var newK = CP.Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
+                var rowCount = 0;
+                for (var r = 0; r < globalK.rowCount; r++) {
+                    if (rowsToRemove.indexOf(r) === -1) {
+                        for (var c = 0; c < newK.columnCount; c++)
+                            newK.setValue(rowCount, c, globalK.getValue(r, c));
+                        rowCount++;
+                    }
+                }
+                var globalR = newK.multiply(globalQ);
+                var rowCount = 0;
+                this.nodes.forEach(function (node) {
+                    var x, y, z = undefined;
+                    if (node.displacement.x !== undefined)
+                        x = globalR.getValue(rowCount++, 0);
+                    if (_this.dof >= 2 && node.displacement.y !== undefined)
+                        y = globalR.getValue(rowCount++, 0);
+                    if (_this.dof >= 3 && node.displacement.z !== undefined)
+                        z = globalR.getValue(rowCount++, 0);
+                    node.reactionForce = new CP.Mathematics.Vector3(x, y, z);
+                });
+            };
+            Structure.prototype.solve = function () {
+                // computing global stiffness matrix
+                var globalK = this.calculateStiffnessMatrix();
+                var globalF = this.calculateForceMatrix();
+                var globalQ = this.calculateDisplacementMatrix(globalK, globalF);
+                // compute reaction
+                this.calculateReactionDisplacements(globalQ);
+                this.calculateReactionForces(globalK, globalQ);
+            };
+            return Structure;
+        })(Mechanical.Element);
+        Mechanical.Structure = Structure;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var TrussElement = (function (_super) {
+            __extends(TrussElement, _super);
+            function TrussElement(material, area, node1, node2) {
+                _super.call(this, material);
+                this.area = area;
+                this.nodes.push(node1);
+                this.nodes.push(node2);
+            }
+            Object.defineProperty(TrussElement.prototype, "length", {
+                get: function () {
+                    return this.nodes[0].position.subtract(this.nodes[1].position).magnitude();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(TrussElement.prototype, "coefficient", {
+                get: function () {
+                    return this.area.magnitude * this.material.elasticModulus.magnitude / this.length;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            TrussElement.prototype.calculateCoefficientMatrix = function () {
+                var length = this.nodes[1].position.subtract(this.nodes[0].position);
+                var x = length.x;
+                var y = length.y;
+                var a = x / Math.sqrt(x * x + y * y);
+                var b = y / Math.sqrt(x * x + y * y);
+                var a2 = a * a;
+                var b2 = b * b;
+                var ab = a * b;
+                var k = CP.Mathematics.Matrix.new(4, 4);
+                k.setValue(0, 0, a2);
+                k.setValue(0, 1, ab);
+                k.setValue(0, 2, -a2);
+                k.setValue(0, 3, -ab);
+                k.setValue(1, 0, ab);
+                k.setValue(1, 1, b2);
+                k.setValue(1, 2, -ab);
+                k.setValue(1, 3, -b2);
+                k.setValue(2, 0, -a2);
+                k.setValue(2, 1, -ab);
+                k.setValue(2, 2, a2);
+                k.setValue(2, 3, ab);
+                k.setValue(3, 0, -ab);
+                k.setValue(3, 1, -b2);
+                k.setValue(3, 2, ab);
+                k.setValue(3, 3, b2);
+                return k;
+            };
+            TrussElement.prototype.calculateStiffnessMatrix = function () {
+                var k = this.calculateCoefficientMatrix();
+                var c = this.coefficient;
+                k = k.scale(c);
+                return k;
+            };
+            TrussElement.prototype.calcualteTransformMatrix = function () {
+                var length = this.nodes[1].position.subtract(this.nodes[0].position);
+                var x = length.x;
+                var y = length.y;
+                var a = x / Math.sqrt(x * x + y * y);
+                var b = y / Math.sqrt(x * x + y * y);
+                var k = CP.Mathematics.Matrix.new(4, 4);
+                k.setValue(0, 0, a);
+                k.setValue(0, 1, b);
+                k.setValue(1, 0, -b);
+                k.setValue(1, 1, a);
+                k.setValue(2, 2, a);
+                k.setValue(2, 3, b);
+                k.setValue(3, 2, -b);
+                k.setValue(3, 3, a);
+                return k;
+            };
+            TrussElement.prototype.calcualteGlobalDisplacementMatrix = function () {
+                var globalDisplacementMatrix = CP.Mathematics.Matrix.new(this.nodes.length * 2, 1);
+                var row = 0;
+                this.nodes.forEach(function (node) {
+                    globalDisplacementMatrix.setValue(row++, 0, node.displacement.x);
+                    globalDisplacementMatrix.setValue(row++, 0, node.displacement.y);
+                });
+                return globalDisplacementMatrix;
+            };
+            return TrussElement;
+        })(Mechanical.Element);
+        Mechanical.TrussElement = TrussElement;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var TrussStructure = (function (_super) {
+            __extends(TrussStructure, _super);
+            function TrussStructure(dof, elements, nodes) {
+                _super.call(this, dof, elements, nodes);
+                this.dof = dof;
+            }
+            return TrussStructure;
+        })(Mechanical.Structure);
+        Mechanical.TrussStructure = TrussStructure;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
 })(CP || (CP = {}));
