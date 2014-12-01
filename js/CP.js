@@ -759,7 +759,10 @@ var CP;
                 var str = '[';
                 var dimensions = this.getDimensions();
                 for (var i = 0; i < dimensions; i++) {
-                    str = str + this.getComponent(i);
+                    var component = this.getComponent(i);
+                    if (component === undefined)
+                        continue;
+                    str = str + Math.round(component * 1000) / 1000;
                     if (i < dimensions - 1)
                         str = str + ', ';
                 }
@@ -920,7 +923,9 @@ var CP;
             Node.prototype.render = function (ctx) {
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = new CP.Graphics.Color(0, 0, 0);
+                var forceColor = new CP.Graphics.Color(255, 0, 0);
                 var size = 1;
+                // draw the node
                 ctx.beginPath();
                 ctx.arc(this.position.x, this.position.y, size, 0, 2 * Math.PI);
                 ctx.fillStyle = fillColor;
@@ -928,6 +933,32 @@ var CP;
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = lineColor;
                 ctx.stroke();
+                ctx.fillStyle = lineColor;
+                ctx.font = "4px serif";
+                ctx.fillText(this.number.toString(), this.position.x, this.position.y);
+                this.drawForce(ctx, this.force, new CP.Graphics.Color(0, 0, 255));
+                this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(255, 0, 0));
+            };
+            Node.prototype.drawForce = function (ctx, force, color) {
+                var forceLineLength = 10;
+                if (force) {
+                    if (force.x) {
+                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(forceLineLength * (force.x > 0 ? 1 : -1), 0)), color, force.x.toString());
+                    }
+                    if (force.y) {
+                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? 1 : -1))), color, force.y.toString());
+                    }
+                }
+            };
+            Node.prototype.drawForceLine = function (ctx, start, end, color, text) {
+                ctx.beginPath();
+                ctx.lineWidth = 0.5;
+                ctx.strokeStyle = color;
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+                //ctx.font = "4px serif";
+                //ctx.fillText(text, end.x, end.y);
             };
             return Node;
         })();
@@ -961,7 +992,6 @@ var CP;
             Element.prototype.render = function (ctx) {
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = new CP.Graphics.Color(0, 0, 0);
-                var size = 1;
                 ctx.beginPath();
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = lineColor;
@@ -1239,11 +1269,11 @@ var CP;
                 this.calculateReactionForces(globalK, globalQ);
             };
             Structure.prototype.render = function (ctx) {
-                this.nodes.forEach(function (node) {
-                    node.render(ctx);
-                });
                 this.elements.forEach(function (element) {
                     element.render(ctx);
+                });
+                this.nodes.forEach(function (node) {
+                    node.render(ctx);
                 });
             };
             return Structure;

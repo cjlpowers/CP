@@ -38,7 +38,10 @@ module CP.Mathematics {
             var str = '[';
             var dimensions = this.getDimensions();
             for (var i = 0; i < dimensions; i++) {
-                str = str + this.getComponent(i);
+                var component = this.getComponent(i);
+                if (component === undefined)
+                    continue;
+                str = str + Math.round(component * 1000) / 1000;
                 if (i < dimensions - 1)
                     str = str + ', ';
             }

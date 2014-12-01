@@ -30,7 +30,6 @@ module CP.Mechanical {
         public render(ctx: CanvasRenderingContext2D) {
             var fillColor = new Graphics.Color(100, 100, 100);
             var lineColor = new Graphics.Color(0, 0, 0);
-            var size = 1;
 
             ctx.beginPath();
             ctx.lineWidth = 1;

@@ -161,12 +161,12 @@ module CP.Mechanical {
         }
 
         public render(ctx: CanvasRenderingContext2D) {
-            this.nodes.forEach((node) => {
-                node.render(ctx);
-            });
-
             this.elements.forEach((element) => {
                 element.render(ctx);
+            });
+
+            this.nodes.forEach((node) => {
+                node.render(ctx);
             });
         }
     }

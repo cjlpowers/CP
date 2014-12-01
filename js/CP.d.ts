@@ -189,6 +189,8 @@ declare module CP.Mechanical {
         reactionDisplacement: Mathematics.Vector3;
         constructor(number: number);
         render(ctx: CanvasRenderingContext2D): void;
+        drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color): void;
+        drawForceLine(ctx: CanvasRenderingContext2D, start: Mathematics.Vector3, end: Mathematics.Vector3, color: Graphics.Color, text: string): void;
     }
 }
 declare module CP.Mechanical {
