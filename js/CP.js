@@ -935,24 +935,24 @@ var CP;
                 ctx.stroke();
                 ctx.fillStyle = lineColor;
                 ctx.font = "4px serif";
-                ctx.fillText(this.number.toString(), this.position.x, this.position.y);
-                this.drawForce(ctx, this.force, new CP.Graphics.Color(0, 0, 255));
-                this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(255, 0, 0));
+                ctx.fillText(this.number.toString(), this.position.x + 2, this.position.y + 5);
+                this.drawForce(ctx, this.force, new CP.Graphics.Color(0, 0, 255), 1);
+                this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(255, 0, 0), 0.5);
             };
-            Node.prototype.drawForce = function (ctx, force, color) {
+            Node.prototype.drawForce = function (ctx, force, color, width) {
                 var forceLineLength = 10;
                 if (force) {
-                    if (force.x) {
-                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(forceLineLength * (force.x > 0 ? 1 : -1), 0)), color, force.x.toString());
+                    if (force.x && Math.abs(force.x) > 0.00001) {
+                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(forceLineLength * (force.x > 0 ? -1 : 1), 0)), color, width, force.x.toString());
                     }
-                    if (force.y) {
-                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? 1 : -1))), color, force.y.toString());
+                    if (force.y && Math.abs(force.y) > 0.00001) {
+                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? -1 : 1))), color, width, force.y.toString());
                     }
                 }
             };
-            Node.prototype.drawForceLine = function (ctx, start, end, color, text) {
+            Node.prototype.drawForceLine = function (ctx, start, end, color, width, text) {
                 ctx.beginPath();
-                ctx.lineWidth = 0.5;
+                ctx.lineWidth = width;
                 ctx.strokeStyle = color;
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
@@ -1224,37 +1224,39 @@ var CP;
                 });
             };
             Structure.prototype.calculateReactionForces = function (globalK, globalQ) {
+                //var rowsToRemove = new Array<number>();
+                //for (var n = 0; n < this.nodes.length; n++) {
+                //    var node = this.nodes[n];
+                //    var globalNumber = node.number - 1;
                 var _this = this;
-                var rowsToRemove = new Array();
-                for (var n = 0; n < this.nodes.length; n++) {
-                    var node = this.nodes[n];
-                    var globalNumber = node.number - 1;
-                    if (node.displacement.x === undefined)
-                        rowsToRemove.push(globalNumber * this.dof);
-                    if (this.dof >= 2 && node.displacement.y === undefined)
-                        rowsToRemove.push(globalNumber * this.dof + 1);
-                    if (this.dof >= 3 && node.displacement.z === undefined)
-                        rowsToRemove.push(globalNumber * this.dof + 2);
-                }
-                // remove the rows
-                var newK = CP.Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
-                var rowCount = 0;
-                for (var r = 0; r < globalK.rowCount; r++) {
-                    if (rowsToRemove.indexOf(r) === -1) {
-                        for (var c = 0; c < newK.columnCount; c++)
-                            newK.setValue(rowCount, c, globalK.getValue(r, c));
-                        rowCount++;
-                    }
-                }
-                var globalR = newK.multiply(globalQ);
+                //    if (node.displacement.x === undefined)
+                //        rowsToRemove.push(globalNumber * this.dof);
+                //    if (this.dof >= 2 && node.displacement.y === undefined)
+                //        rowsToRemove.push(globalNumber * this.dof + 1);
+                //    if (this.dof >= 3 && node.displacement.z === undefined)
+                //        rowsToRemove.push(globalNumber * this.dof + 2);
+                //}
+                //// remove the rows
+                //var newK = Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
+                //var rowCount = 0;
+                //for (var r = 0; r < globalK.rowCount; r++)
+                //{
+                //    if (rowsToRemove.indexOf(r) === -1) {
+                //        for (var c = 0; c < newK.columnCount; c++)
+                //            newK.setValue(rowCount, c, globalK.getValue(r, c));
+                //        rowCount++;
+                //    }
+                //}
+                //var globalR = newK.multiply(globalQ);
+                var globalR = globalK.multiply(globalQ);
                 var rowCount = 0;
                 this.nodes.forEach(function (node) {
                     var x, y, z = undefined;
-                    if (node.displacement.x !== undefined)
+                    if (_this.dof >= 1)
                         x = globalR.getValue(rowCount++, 0);
-                    if (_this.dof >= 2 && node.displacement.y !== undefined)
+                    if (_this.dof >= 2)
                         y = globalR.getValue(rowCount++, 0);
-                    if (_this.dof >= 3 && node.displacement.z !== undefined)
+                    if (_this.dof >= 3)
                         z = globalR.getValue(rowCount++, 0);
                     node.reactionForce = new CP.Mathematics.Vector3(x, y, z);
                 });

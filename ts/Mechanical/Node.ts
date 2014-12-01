@@ -53,27 +53,27 @@ module CP.Mechanical {
             ctx.stroke();
             ctx.fillStyle = lineColor;
             ctx.font = "4px serif";
-            ctx.fillText(this.number.toString(), this.position.x, this.position.y);
+            ctx.fillText(this.number.toString(), this.position.x + 2, this.position.y + 5);
 
-            this.drawForce(ctx, this.force, new Graphics.Color(0, 0, 255));
-            this.drawForce(ctx, this.reactionForce, new Graphics.Color(255, 0, 0));
+            this.drawForce(ctx, this.force, new Graphics.Color(0, 0, 255), 1);
+            this.drawForce(ctx, this.reactionForce, new Graphics.Color(255, 0, 0), 0.5);
         }
 
-        drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color) {
+        drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color, width: number) {
             var forceLineLength = 10;
             if (force) {
-                if (force.x) {
-                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(forceLineLength * (force.x > 0 ? 1 : -1), 0)), color, force.x.toString());
+                if (force.x && Math.abs(force.x) > 0.00001 ) {
+                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(forceLineLength * (force.x > 0 ? -1 : 1), 0)), color, width, force.x.toString());
                 }
-                if (force.y) {
-                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? 1 : -1))), color, force.y.toString());
+                if (force.y && Math.abs(force.y) > 0.00001) {
+                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? -1 : 1))), color, width, force.y.toString());
                 }
             }
         }
 
-        drawForceLine(ctx: CanvasRenderingContext2D, start: Mathematics.Vector3, end: Mathematics.Vector3, color: Graphics.Color, text: string) {
+        drawForceLine(ctx: CanvasRenderingContext2D, start: Mathematics.Vector3, end: Mathematics.Vector3, color: Graphics.Color, width: number, text: string) {
             ctx.beginPath();
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = width;
             ctx.strokeStyle = color;
             ctx.moveTo(start.x, start.y);
             ctx.lineTo(end.x, end.y);

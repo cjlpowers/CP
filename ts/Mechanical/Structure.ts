@@ -106,43 +106,43 @@ module CP.Mechanical {
 
         public calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix)
         {
-            var rowsToRemove = new Array<number>();
-            for (var n = 0; n < this.nodes.length; n++) {
-                var node = this.nodes[n];
-                var globalNumber = node.number - 1;
+            //var rowsToRemove = new Array<number>();
+            //for (var n = 0; n < this.nodes.length; n++) {
+            //    var node = this.nodes[n];
+            //    var globalNumber = node.number - 1;
 
-                if (node.displacement.x === undefined)
-                    rowsToRemove.push(globalNumber * this.dof);
-                if (this.dof >= 2 && node.displacement.y === undefined)
-                    rowsToRemove.push(globalNumber * this.dof + 1);
-                if (this.dof >= 3 && node.displacement.z === undefined)
-                    rowsToRemove.push(globalNumber * this.dof + 2);
-            }
+            //    if (node.displacement.x === undefined)
+            //        rowsToRemove.push(globalNumber * this.dof);
+            //    if (this.dof >= 2 && node.displacement.y === undefined)
+            //        rowsToRemove.push(globalNumber * this.dof + 1);
+            //    if (this.dof >= 3 && node.displacement.z === undefined)
+            //        rowsToRemove.push(globalNumber * this.dof + 2);
+            //}
 
-            // remove the rows
-            var newK = Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
+            //// remove the rows
+            //var newK = Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
 
-            var rowCount = 0;
-            for (var r = 0; r < globalK.rowCount; r++)
-            {
-                if (rowsToRemove.indexOf(r) === -1) {
-                    for (var c = 0; c < newK.columnCount; c++)
-                        newK.setValue(rowCount, c, globalK.getValue(r, c));
-                    rowCount++;
-                }
-            }
+            //var rowCount = 0;
+            //for (var r = 0; r < globalK.rowCount; r++)
+            //{
+            //    if (rowsToRemove.indexOf(r) === -1) {
+            //        for (var c = 0; c < newK.columnCount; c++)
+            //            newK.setValue(rowCount, c, globalK.getValue(r, c));
+            //        rowCount++;
+            //    }
+            //}
 
-            var globalR = newK.multiply(globalQ);
-
+            //var globalR = newK.multiply(globalQ);
+            var globalR = globalK.multiply(globalQ);
             var rowCount = 0;
             this.nodes.forEach((node) => {
                 var x,y,z = undefined;
 
-                if (node.displacement.x !== undefined)
+                if (this.dof >= 1)
                     x = globalR.getValue(rowCount++, 0);
-                if (this.dof >= 2 && node.displacement.y !== undefined)
+                if (this.dof >= 2)
                     y = globalR.getValue(rowCount++, 0);
-                if (this.dof >= 3 && node.displacement.z !== undefined)
+                if (this.dof >= 3)
                     z = globalR.getValue(rowCount++, 0);
 
                 node.reactionForce = new Mathematics.Vector3(x, y, z);
