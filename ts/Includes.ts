@@ -6,6 +6,7 @@
 /// <reference path="Mechanical/Material.ts" />
 /// <reference path="Mechanical/Node.ts" />
 /// <reference path="Mechanical/Element.ts" />
+/// <reference path="Mechanical/Structure.ts" />
 
 /// <reference path="Log.ts" />
 

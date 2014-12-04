@@ -1,7 +1,10 @@
 ﻿/// <reference path="../Includes.ts" />
 
 module CP.Mechanical {
-    export class Structure<T extends Element> extends Element implements Graphics.CanvasElement{
+    export class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
+        showElements: boolean = true;
+        showNodes: boolean = true;
+
         constructor(public dof: number, protected elements: Array<T>, nodes: Array<Node>) {
             super(Material.Aluminium);
             this.nodes = nodes;
@@ -36,17 +39,16 @@ module CP.Mechanical {
 
         public calculateForceMatrix(): Mathematics.Matrix {
             var f = Mathematics.Matrix.new(this.nodes.length * this.dof, 1);
-            for (var r = 0; r < this.nodes.length; r++)
-            {
+            for (var r = 0; r < this.nodes.length; r++) {
                 var n = this.nodes[r];
                 if (n.force.x !== undefined)
                     f.setValue(r * this.dof, 0, n.force.x);
 
                 if (this.dof >= 2 && n.force.y !== undefined)
-                        f.setValue(r * this.dof + 1, 0, n.force.y);
+                    f.setValue(r * this.dof + 1, 0, n.force.y);
 
                 if (this.dof >= 3 && n.force.z !== undefined)
-                        f.setValue(r * this.dof + 2, 0, n.force.z);
+                    f.setValue(r * this.dof + 2, 0, n.force.z);
             }
             return f;
         }
@@ -60,12 +62,11 @@ module CP.Mechanical {
             for (var r = 0; r < globalK.rowCount; r++)
                 for (var c = 0; c < globalK.columnCount; c++)
                     if (coeff < globalK.getValue(r, c))
-                coeff = globalK.getValue(r, c);
+                        coeff = globalK.getValue(r, c);
 
             coeff *= 10000;
 
-            for(var n = 0; n < this.nodes.length; n++)
-            {
+            for (var n = 0; n < this.nodes.length; n++) {
                 var node = this.nodes[n];
                 var globalNumber = node.number - 1;
 
@@ -89,8 +90,7 @@ module CP.Mechanical {
             return globalQ;
         }
 
-        public calculateReactionDisplacements(globalQ: Mathematics.Matrix)
-        {
+        public calculateReactionDisplacements(globalQ: Mathematics.Matrix) {
             this.nodes.forEach((node) => {
                 var globalNumber = node.number - 1;
                 if (this.dof === 1)
@@ -104,8 +104,7 @@ module CP.Mechanical {
             });
         }
 
-        public calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix)
-        {
+        public calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix) {
             //var rowsToRemove = new Array<number>();
             //for (var n = 0; n < this.nodes.length; n++) {
             //    var node = this.nodes[n];
@@ -136,7 +135,7 @@ module CP.Mechanical {
             var globalR = globalK.multiply(globalQ);
             var rowCount = 0;
             this.nodes.forEach((node) => {
-                var x,y,z = undefined;
+                var x, y, z = undefined;
 
                 if (this.dof >= 1)
                     x = globalR.getValue(rowCount++, 0);
@@ -154,20 +153,57 @@ module CP.Mechanical {
             var globalK = this.calculateStiffnessMatrix();
             var globalF = this.calculateForceMatrix();
             var globalQ = this.calculateDisplacementMatrix(globalK, globalF);
-            
+
             // compute reaction
             this.calculateReactionDisplacements(globalQ);
             this.calculateReactionForces(globalK, globalQ);
         }
 
-        public render(ctx: CanvasRenderingContext2D) {
-            this.elements.forEach((element) => {
-                element.render(ctx);
+        public render(ctx: CanvasRenderingContext2D, options?: any) {
+            if (this.showElements) {
+                this.elements.forEach((element) => {
+                    element.render(ctx);
+                });
+            }
+
+            if (this.showNodes) {
+                this.nodes.forEach((node) => {
+                    node.render(ctx);
+                });
+            }
+        }
+
+        static load(definition: StructureDefinition) {
+            var nodes = definition.nodes.map((e, i) => {
+                var node = new Node(i+1);
+
+                if (e.position) {
+                    node.position.x = e.position.x !== undefined ? e.position.x : node.position.x;
+                    node.position.y = e.position.y !== undefined ? e.position.y : node.position.y;
+                    node.position.z = e.position.z !== undefined ? e.position.z : node.position.z;
+                }
+
+                if (e.force) {
+                    node.force.x = e.force.x !== undefined ? e.force.x : node.force.x;
+                    node.force.y = e.force.y !== undefined ? e.force.y : node.force.y;
+                    node.force.z = e.force.z !== undefined ? e.force.z : node.force.z;
+                }
+
+                if (e.displacement) {
+                    node.displacement.x = e.displacement.x !== undefined ? e.displacement.x : node.displacement.x;
+                    node.displacement.y = e.displacement.y !== undefined ? e.displacement.y : node.displacement.y;
+                    node.displacement.z = e.displacement.z !== undefined ? e.displacement.z : node.displacement.z;
+                }
+
+                return node;
             });
 
-            this.nodes.forEach((node) => {
-                node.render(ctx);
+            var elements = definition.elements.map((e, i) => {
+                return new TrussElement(Material.Aluminium, new Mathematics.Value(e.area, null), nodes[e.nodes[0]], nodes[e.nodes[1]]);
             });
+
+            var structure = new Structure(2, elements, nodes);
+            return structure;
         }
     }
 }

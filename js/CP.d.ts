@@ -111,7 +111,7 @@ declare module CP.Genetics {
 }
 declare module CP.Graphics {
     interface CanvasElement {
-        render(context: CanvasRenderingContext2D): any;
+        render(context: CanvasRenderingContext2D, options?: any): any;
     }
 }
 declare module CP.Graphics {
@@ -188,7 +188,7 @@ declare module CP.Mechanical {
         reactionForce: Mathematics.Vector3;
         reactionDisplacement: Mathematics.Vector3;
         constructor(number: number);
-        render(ctx: CanvasRenderingContext2D): void;
+        render(ctx: CanvasRenderingContext2D, options?: any): void;
         drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color, width: number): void;
         drawForceLine(ctx: CanvasRenderingContext2D, start: Mathematics.Vector3, end: Mathematics.Vector3, color: Graphics.Color, width: number, text: string): void;
     }
@@ -203,7 +203,24 @@ declare module CP.Mechanical {
         calcualteTransformMatrix(): Mathematics.Matrix;
         calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
         calcualteLocalDisplacementMatrix(): Mathematics.Matrix;
-        render(ctx: CanvasRenderingContext2D): void;
+        render(ctx: CanvasRenderingContext2D, options?: any): void;
+    }
+}
+declare module CP.Mechanical {
+    class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
+        dof: number;
+        protected elements: T[];
+        showElements: boolean;
+        showNodes: boolean;
+        constructor(dof: number, elements: T[], nodes: Node[]);
+        calculateStiffnessMatrix(): Mathematics.Matrix;
+        calculateForceMatrix(): Mathematics.Matrix;
+        calculateDisplacementMatrix(globalK: Mathematics.Matrix, globalF: Mathematics.Matrix): Mathematics.Matrix;
+        calculateReactionDisplacements(globalQ: Mathematics.Matrix): void;
+        calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix): void;
+        solve(): void;
+        render(ctx: CanvasRenderingContext2D, options?: any): void;
+        static load(definition: StructureDefinition): Structure<TrussElement>;
     }
 }
 declare module CP {
@@ -235,17 +252,29 @@ declare module CP.Mathematics {
     }
 }
 declare module CP.Mechanical {
-    class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
-        dof: number;
-        protected elements: T[];
-        constructor(dof: number, elements: T[], nodes: Node[]);
-        calculateStiffnessMatrix(): Mathematics.Matrix;
-        calculateForceMatrix(): Mathematics.Matrix;
-        calculateDisplacementMatrix(globalK: Mathematics.Matrix, globalF: Mathematics.Matrix): Mathematics.Matrix;
-        calculateReactionDisplacements(globalQ: Mathematics.Matrix): void;
-        calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix): void;
-        solve(): void;
-        render(ctx: CanvasRenderingContext2D): void;
+    class StructureDefinition {
+        nodes: {
+            force?: {
+                x?: number;
+                y?: number;
+                z?: number;
+            };
+            position: {
+                x: number;
+                y: number;
+                z?: number;
+            };
+            displacement?: {
+                x?: number;
+                y?: number;
+                z?: number;
+            };
+        }[];
+        elements: {
+            area: number;
+            nodes: number[];
+            material?: number;
+        }[];
     }
 }
 declare module CP.Mechanical {

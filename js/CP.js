@@ -920,7 +920,7 @@ var CP;
                 this.reactionForce.z = undefined;
                 this.reactionForce.unit = "N";
             }
-            Node.prototype.render = function (ctx) {
+            Node.prototype.render = function (ctx, options) {
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = new CP.Graphics.Color(0, 0, 0);
                 var forceColor = new CP.Graphics.Color(255, 0, 0);
@@ -989,7 +989,7 @@ var CP;
                 var globalDisplacementMatrix = this.calcualteGlobalDisplacementMatrix();
                 return transformMatrix.multiply(globalDisplacementMatrix);
             };
-            Element.prototype.render = function (ctx) {
+            Element.prototype.render = function (ctx, options) {
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = new CP.Graphics.Color(0, 0, 0);
                 ctx.beginPath();
@@ -1004,131 +1004,6 @@ var CP;
         Mechanical.Element = Element;
     })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
 })(CP || (CP = {}));
-/// <reference path="Includes.ts" />
-var CP;
-(function (CP) {
-    var Log = (function () {
-        function Log() {
-        }
-        Log.debug = function (message) {
-            var optionalParams = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                optionalParams[_i - 1] = arguments[_i];
-            }
-            (console.debug || Log.log)(message, optionalParams);
-        };
-        Log.log = function (message) {
-            var optionalParams = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                optionalParams[_i - 1] = arguments[_i];
-            }
-            console.log(message, optionalParams);
-        };
-        Log.info = function (message) {
-            var optionalParams = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                optionalParams[_i - 1] = arguments[_i];
-            }
-            (console.info || Log.log)(message, optionalParams);
-        };
-        Log.warn = function (message) {
-            var optionalParams = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                optionalParams[_i - 1] = arguments[_i];
-            }
-            (console.warn || Log.log)(message, optionalParams);
-        };
-        Log.error = function (message) {
-            var optionalParams = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                optionalParams[_i - 1] = arguments[_i];
-            }
-            (console.error || Log.log)(message, optionalParams);
-        };
-        return Log;
-    })();
-    CP.Log = Log;
-})(CP || (CP = {}));
-/// <reference path="Mathematics/Value.ts" />
-/// <reference path="Mathematics/Vector.ts" />
-/// <reference path="Mathematics/Vector2.ts" />
-/// <reference path="Mathematics/Vector3.ts" />
-/// <reference path="Mechanical/Material.ts" />
-/// <reference path="Mechanical/Node.ts" />
-/// <reference path="Mechanical/Element.ts" />
-/// <reference path="Log.ts" />
-var numeric;
-var CP;
-(function (CP) {
-    var Mathematics;
-    (function (Mathematics) {
-        var Matrix = (function () {
-            function Matrix(matrix) {
-                this.matrix = matrix;
-                if (!matrix) {
-                    throw new Error("Must provide a matrix");
-                }
-                this.rowCount = matrix.length;
-                this.columnCount = this.rowCount > 0 ? matrix[0].length : 0;
-            }
-            Object.defineProperty(Matrix.prototype, "rowCount", {
-                get: function () {
-                    return this.matrix.length;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Object.defineProperty(Matrix.prototype, "columnCount", {
-                get: function () {
-                    return this.matrix.length > 0 ? this.matrix[0].length : 0;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Matrix.prototype.toString = function () {
-                return this.matrix.toString();
-            };
-            Matrix.prototype.getValue = function (row, column) {
-                var obj = this.matrix[row];
-                if (column === 0 && !Array.isArray(obj))
-                    return obj;
-                return obj[column];
-            };
-            Matrix.prototype.setValue = function (row, column, value) {
-                this.matrix[row][column] = value;
-            };
-            Matrix.prototype.addValue = function (row, column, value) {
-                this.setValue(row, column, this.getValue(row, column) + value);
-            };
-            Matrix.prototype.multiply = function (b) {
-                return new Matrix(numeric.dot(this.matrix, b.matrix));
-            };
-            Matrix.prototype.scale = function (multiplier) {
-                return new Matrix(numeric.mul(multiplier, this.matrix));
-            };
-            Matrix.prototype.inverse = function () {
-                return new Matrix(numeric.inv(this.matrix));
-            };
-            Matrix.prototype.clone = function () {
-                return this.scale(1);
-            };
-            Matrix.new = function (rows, cols) {
-                var result = new Array(rows);
-                for (var r = 0; r < rows; r++) {
-                    result[r] = new Array(cols);
-                    for (var c = 0; c < cols; c++)
-                        result[r][c] = 0;
-                }
-                return new Matrix(result);
-            };
-            Matrix.solveAxEqualsB = function (a, b) {
-                return new CP.Mathematics.Matrix(numeric.solve(a.matrix, b.matrix));
-            };
-            return Matrix;
-        })();
-        Mathematics.Matrix = Matrix;
-    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
-})(CP || (CP = {}));
 /// <reference path="../Includes.ts" />
 var CP;
 (function (CP) {
@@ -1140,6 +1015,8 @@ var CP;
                 _super.call(this, Mechanical.Material.Aluminium);
                 this.dof = dof;
                 this.elements = elements;
+                this.showElements = true;
+                this.showNodes = true;
                 this.nodes = nodes;
             }
             Structure.prototype.calculateStiffnessMatrix = function () {
@@ -1270,17 +1147,186 @@ var CP;
                 this.calculateReactionDisplacements(globalQ);
                 this.calculateReactionForces(globalK, globalQ);
             };
-            Structure.prototype.render = function (ctx) {
-                this.elements.forEach(function (element) {
-                    element.render(ctx);
+            Structure.prototype.render = function (ctx, options) {
+                if (this.showElements) {
+                    this.elements.forEach(function (element) {
+                        element.render(ctx);
+                    });
+                }
+                if (this.showNodes) {
+                    this.nodes.forEach(function (node) {
+                        node.render(ctx);
+                    });
+                }
+            };
+            Structure.load = function (definition) {
+                var nodes = definition.nodes.map(function (e, i) {
+                    var node = new Mechanical.Node(i + 1);
+                    if (e.position) {
+                        node.position.x = e.position.x !== undefined ? e.position.x : node.position.x;
+                        node.position.y = e.position.y !== undefined ? e.position.y : node.position.y;
+                        node.position.z = e.position.z !== undefined ? e.position.z : node.position.z;
+                    }
+                    if (e.force) {
+                        node.force.x = e.force.x !== undefined ? e.force.x : node.force.x;
+                        node.force.y = e.force.y !== undefined ? e.force.y : node.force.y;
+                        node.force.z = e.force.z !== undefined ? e.force.z : node.force.z;
+                    }
+                    if (e.displacement) {
+                        node.displacement.x = e.displacement.x !== undefined ? e.displacement.x : node.displacement.x;
+                        node.displacement.y = e.displacement.y !== undefined ? e.displacement.y : node.displacement.y;
+                        node.displacement.z = e.displacement.z !== undefined ? e.displacement.z : node.displacement.z;
+                    }
+                    return node;
                 });
-                this.nodes.forEach(function (node) {
-                    node.render(ctx);
+                var elements = definition.elements.map(function (e, i) {
+                    return new Mechanical.TrussElement(Mechanical.Material.Aluminium, new CP.Mathematics.Value(e.area, null), nodes[e.nodes[0]], nodes[e.nodes[1]]);
                 });
+                var structure = new Structure(2, elements, nodes);
+                return structure;
             };
             return Structure;
         })(Mechanical.Element);
         Mechanical.Structure = Structure;
+    })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
+})(CP || (CP = {}));
+/// <reference path="Includes.ts" />
+var CP;
+(function (CP) {
+    var Log = (function () {
+        function Log() {
+        }
+        Log.debug = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.debug || Log.log)(message, optionalParams);
+        };
+        Log.log = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            console.log(message, optionalParams);
+        };
+        Log.info = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.info || Log.log)(message, optionalParams);
+        };
+        Log.warn = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.warn || Log.log)(message, optionalParams);
+        };
+        Log.error = function (message) {
+            var optionalParams = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                optionalParams[_i - 1] = arguments[_i];
+            }
+            (console.error || Log.log)(message, optionalParams);
+        };
+        return Log;
+    })();
+    CP.Log = Log;
+})(CP || (CP = {}));
+/// <reference path="Mathematics/Value.ts" />
+/// <reference path="Mathematics/Vector.ts" />
+/// <reference path="Mathematics/Vector2.ts" />
+/// <reference path="Mathematics/Vector3.ts" />
+/// <reference path="Mechanical/Material.ts" />
+/// <reference path="Mechanical/Node.ts" />
+/// <reference path="Mechanical/Element.ts" />
+/// <reference path="Mechanical/Structure.ts" />
+/// <reference path="Log.ts" />
+var numeric;
+var CP;
+(function (CP) {
+    var Mathematics;
+    (function (Mathematics) {
+        var Matrix = (function () {
+            function Matrix(matrix) {
+                this.matrix = matrix;
+                if (!matrix) {
+                    throw new Error("Must provide a matrix");
+                }
+                this.rowCount = matrix.length;
+                this.columnCount = this.rowCount > 0 ? matrix[0].length : 0;
+            }
+            Object.defineProperty(Matrix.prototype, "rowCount", {
+                get: function () {
+                    return this.matrix.length;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Matrix.prototype, "columnCount", {
+                get: function () {
+                    return this.matrix.length > 0 ? this.matrix[0].length : 0;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Matrix.prototype.toString = function () {
+                return this.matrix.toString();
+            };
+            Matrix.prototype.getValue = function (row, column) {
+                var obj = this.matrix[row];
+                if (column === 0 && !Array.isArray(obj))
+                    return obj;
+                return obj[column];
+            };
+            Matrix.prototype.setValue = function (row, column, value) {
+                this.matrix[row][column] = value;
+            };
+            Matrix.prototype.addValue = function (row, column, value) {
+                this.setValue(row, column, this.getValue(row, column) + value);
+            };
+            Matrix.prototype.multiply = function (b) {
+                return new Matrix(numeric.dot(this.matrix, b.matrix));
+            };
+            Matrix.prototype.scale = function (multiplier) {
+                return new Matrix(numeric.mul(multiplier, this.matrix));
+            };
+            Matrix.prototype.inverse = function () {
+                return new Matrix(numeric.inv(this.matrix));
+            };
+            Matrix.prototype.clone = function () {
+                return this.scale(1);
+            };
+            Matrix.new = function (rows, cols) {
+                var result = new Array(rows);
+                for (var r = 0; r < rows; r++) {
+                    result[r] = new Array(cols);
+                    for (var c = 0; c < cols; c++)
+                        result[r][c] = 0;
+                }
+                return new Matrix(result);
+            };
+            Matrix.solveAxEqualsB = function (a, b) {
+                return new CP.Mathematics.Matrix(numeric.solve(a.matrix, b.matrix));
+            };
+            return Matrix;
+        })();
+        Mathematics.Matrix = Matrix;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
+var CP;
+(function (CP) {
+    var Mechanical;
+    (function (Mechanical) {
+        var StructureDefinition = (function () {
+            function StructureDefinition() {
+            }
+            return StructureDefinition;
+        })();
+        Mechanical.StructureDefinition = StructureDefinition;
     })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
 })(CP || (CP = {}));
 /// <reference path="../Includes.ts" />
