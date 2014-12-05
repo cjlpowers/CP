@@ -42,6 +42,13 @@ module CP.Mechanical {
             
             var size = 1;
 
+            // draw the input force
+            this.drawForce(ctx, this.force, new Graphics.Color(50, 50, 50), 0.5);
+
+            // draw the reaction force if present
+            if (!this.force.x && !this.force.y)
+                this.drawForce(ctx, this.reactionForce, new Graphics.Color(0, 200, 0), 0.5); 
+
             // draw the node
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, size, 0, 2 * Math.PI);
@@ -53,9 +60,7 @@ module CP.Mechanical {
             ctx.fillStyle = lineColor;
             ctx.font = "3px serif";
             ctx.fillText(this.number.toString(), this.position.x + 1, this.position.y + 3);
-
-            this.drawForce(ctx, this.force, new Graphics.Color(50, 50, 50), 1);
-            this.drawForce(ctx, this.reactionForce, new Graphics.Color(0, 200, 0), 0.5);
+           
         }
 
         drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color, width: number) {

@@ -128,8 +128,10 @@ module CP.Mechanical {
             ctx.stroke();
 
             var middle = new Mathematics.Vector3(this.nodes[0].position.x + this.vector.x / 2, this.nodes[0].position.y + this.vector.y / 2);
+            ctx.beginPath();
             ctx.fillStyle = Graphics.Color.white;
-            ctx.fillRect(middle.x - 2, middle.y - 2, 4, 4);
+            ctx.arc(middle.x, middle.y, 2, 0, 2 * Math.PI);
+            ctx.fill();
             ctx.font = "3px serif";
             ctx.fillStyle = Graphics.Color.black;
             ctx.fillText(this.number.toString(), middle.x - 1, middle.y + 1);

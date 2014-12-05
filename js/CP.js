@@ -926,6 +926,11 @@ var CP;
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = new CP.Graphics.Color(0, 0, 0);
                 var size = 1;
+                // draw the input force
+                this.drawForce(ctx, this.force, new CP.Graphics.Color(50, 50, 50), 0.5);
+                // draw the reaction force if present
+                if (!this.force.x && !this.force.y)
+                    this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(0, 200, 0), 0.5);
                 // draw the node
                 ctx.beginPath();
                 ctx.arc(this.position.x, this.position.y, size, 0, 2 * Math.PI);
@@ -937,8 +942,6 @@ var CP;
                 ctx.fillStyle = lineColor;
                 ctx.font = "3px serif";
                 ctx.fillText(this.number.toString(), this.position.x + 1, this.position.y + 3);
-                this.drawForce(ctx, this.force, new CP.Graphics.Color(50, 50, 50), 1);
-                this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(0, 200, 0), 0.5);
             };
             Node.prototype.drawForce = function (ctx, force, color, width) {
                 var forceLineLength = 10;
@@ -1409,8 +1412,10 @@ var CP;
                 ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
                 ctx.stroke();
                 var middle = new CP.Mathematics.Vector3(this.nodes[0].position.x + this.vector.x / 2, this.nodes[0].position.y + this.vector.y / 2);
+                ctx.beginPath();
                 ctx.fillStyle = CP.Graphics.Color.white;
-                ctx.fillRect(middle.x - 2, middle.y - 2, 4, 4);
+                ctx.arc(middle.x, middle.y, 2, 0, 2 * Math.PI);
+                ctx.fill();
                 ctx.font = "3px serif";
                 ctx.fillStyle = CP.Graphics.Color.black;
                 ctx.fillText(this.number.toString(), middle.x - 1, middle.y + 1);
@@ -1439,8 +1444,10 @@ var CP;
                 var deltaStress = maxStress - minStress;
                 // set the stress factor in each element
                 this.elements.forEach(function (x) {
-                    if (Math.abs(deltaStress) > 0)
-                        x.stressFactor = (2 * (x.stress.magnitude - minStress) / deltaStress) - 1;
+                    if (x.stress.magnitude > 0 && maxStress > 0)
+                        x.stressFactor = x.stress.magnitude / maxStress;
+                    else if (x.stress.magnitude < 0 && minStress < 0)
+                        x.stressFactor = -x.stress.magnitude / minStress;
                     else
                         x.stressFactor = 0;
                 });

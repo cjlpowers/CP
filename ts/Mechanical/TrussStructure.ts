@@ -17,8 +17,10 @@ module CP.Mechanical {
             var deltaStress = maxStress - minStress;
             // set the stress factor in each element
             this.elements.forEach(x=> {
-                if (Math.abs(deltaStress) > 0)
-                    x.stressFactor = (2 * (x.stress.magnitude - minStress) / deltaStress) - 1;
+                if (x.stress.magnitude > 0 && maxStress > 0)
+                    x.stressFactor = x.stress.magnitude / maxStress;
+                else if (x.stress.magnitude < 0 && minStress < 0)
+                    x.stressFactor = -x.stress.magnitude / minStress;
                 else
                     x.stressFactor = 0;
             });
