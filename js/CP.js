@@ -715,10 +715,11 @@ var CP;
                 this.unit = unit;
             }
             Value.prototype.toString = function () {
+                var mag = Math.round(this.magnitude * 1000) / 1000;
                 if (this.unit)
-                    return this.magnitude.toString() + ' ' + this.unit;
+                    return mag.toString() + ' ' + this.unit;
                 else
-                    return this.magnitude.toString();
+                    return mag.toString();
             };
             return Value;
         })();
@@ -742,9 +743,10 @@ var CP;
                 return this.magnitudeValue;
             };
             Vector.prototype.isZero = function () {
-                return this.components.every(function (value) {
-                    return value === 0;
-                });
+                return this.components.every(function (value) { return value === 0; });
+            };
+            Vector.prototype.isDefined = function () {
+                return this.components.some(function (value) { return value !== undefined; });
             };
             Vector.prototype.getComponent = function (n) {
                 return this.components[n];
@@ -923,7 +925,6 @@ var CP;
             Node.prototype.render = function (ctx, options) {
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = new CP.Graphics.Color(0, 0, 0);
-                var forceColor = new CP.Graphics.Color(255, 0, 0);
                 var size = 1;
                 // draw the node
                 ctx.beginPath();
@@ -934,19 +935,19 @@ var CP;
                 ctx.strokeStyle = lineColor;
                 ctx.stroke();
                 ctx.fillStyle = lineColor;
-                ctx.font = "4px serif";
-                ctx.fillText(this.number.toString(), this.position.x + 2, this.position.y + 5);
-                this.drawForce(ctx, this.force, new CP.Graphics.Color(0, 0, 255), 1);
-                this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(255, 0, 0), 0.5);
+                ctx.font = "3px serif";
+                ctx.fillText(this.number.toString(), this.position.x + 1, this.position.y + 3);
+                this.drawForce(ctx, this.force, new CP.Graphics.Color(50, 50, 50), 1);
+                this.drawForce(ctx, this.reactionForce, new CP.Graphics.Color(0, 200, 0), 0.5);
             };
             Node.prototype.drawForce = function (ctx, force, color, width) {
                 var forceLineLength = 10;
                 if (force) {
                     if (force.x && Math.abs(force.x) > 0.00001) {
-                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(forceLineLength * (force.x > 0 ? -1 : 1), 0)), color, width, force.x.toString());
+                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(forceLineLength * (force.x > 0 ? 1 : -1), 0)), color, width, force.x.toString());
                     }
                     if (force.y && Math.abs(force.y) > 0.00001) {
-                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? -1 : 1))), color, width, force.y.toString());
+                        this.drawForceLine(ctx, this.position, this.position.add(new CP.Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? 1 : -1))), color, width, force.y.toString());
                     }
                 }
             };
@@ -971,7 +972,8 @@ var CP;
     var Mechanical;
     (function (Mechanical) {
         var Element = (function () {
-            function Element(material) {
+            function Element(number, material) {
+                this.number = number;
                 this.material = material;
                 this.nodes = new Array();
             }
@@ -990,14 +992,7 @@ var CP;
                 return transformMatrix.multiply(globalDisplacementMatrix);
             };
             Element.prototype.render = function (ctx, options) {
-                var fillColor = new CP.Graphics.Color(100, 100, 100);
-                var lineColor = new CP.Graphics.Color(0, 0, 0);
-                ctx.beginPath();
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = lineColor;
-                ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
-                ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
-                ctx.stroke();
+                throw new Error("Not Implemented");
             };
             return Element;
         })();
@@ -1012,7 +1007,7 @@ var CP;
         var Structure = (function (_super) {
             __extends(Structure, _super);
             function Structure(dof, elements, nodes) {
-                _super.call(this, Mechanical.Material.Aluminium);
+                _super.call(this, 0, Mechanical.Material.Aluminium);
                 this.dof = dof;
                 this.elements = elements;
                 this.showElements = true;
@@ -1159,32 +1154,6 @@ var CP;
                     });
                 }
             };
-            Structure.load = function (definition) {
-                var nodes = definition.nodes.map(function (e, i) {
-                    var node = new Mechanical.Node(i + 1);
-                    if (e.position) {
-                        node.position.x = e.position.x !== undefined ? e.position.x : node.position.x;
-                        node.position.y = e.position.y !== undefined ? e.position.y : node.position.y;
-                        node.position.z = e.position.z !== undefined ? e.position.z : node.position.z;
-                    }
-                    if (e.force) {
-                        node.force.x = e.force.x !== undefined ? e.force.x : node.force.x;
-                        node.force.y = e.force.y !== undefined ? e.force.y : node.force.y;
-                        node.force.z = e.force.z !== undefined ? e.force.z : node.force.z;
-                    }
-                    if (e.displacement) {
-                        node.displacement.x = e.displacement.x !== undefined ? e.displacement.x : node.displacement.x;
-                        node.displacement.y = e.displacement.y !== undefined ? e.displacement.y : node.displacement.y;
-                        node.displacement.z = e.displacement.z !== undefined ? e.displacement.z : node.displacement.z;
-                    }
-                    return node;
-                });
-                var elements = definition.elements.map(function (e, i) {
-                    return new Mechanical.TrussElement(Mechanical.Material.Aluminium, new CP.Mathematics.Value(e.area, null), nodes[e.nodes[0]], nodes[e.nodes[1]]);
-                });
-                var structure = new Structure(2, elements, nodes);
-                return structure;
-            };
             return Structure;
         })(Mechanical.Element);
         Mechanical.Structure = Structure;
@@ -1296,6 +1265,9 @@ var CP;
             Matrix.prototype.inverse = function () {
                 return new Matrix(numeric.inv(this.matrix));
             };
+            Matrix.prototype.transpose = function () {
+                return new Matrix(numeric.transpose(this.matrix));
+            };
             Matrix.prototype.clone = function () {
                 return this.scale(1);
             };
@@ -1336,11 +1308,17 @@ var CP;
     (function (Mechanical) {
         var TrussElement = (function (_super) {
             __extends(TrussElement, _super);
-            function TrussElement(material, area, node1, node2) {
-                _super.call(this, material);
+            function TrussElement(number, material, area, node1, node2) {
+                _super.call(this, number, material);
                 this.area = area;
                 this.nodes.push(node1);
                 this.nodes.push(node2);
+                this.vector = this.nodes[1].position.subtract(this.nodes[0].position);
+                this.a = this.vector.x / this.vector.magnitude();
+                this.b = this.vector.y / this.vector.magnitude();
+                this.a2 = this.a * this.a;
+                this.b2 = this.b * this.b;
+                this.ab = this.a * this.b;
             }
             Object.defineProperty(TrussElement.prototype, "length", {
                 get: function () {
@@ -1357,31 +1335,23 @@ var CP;
                 configurable: true
             });
             TrussElement.prototype.calculateCoefficientMatrix = function () {
-                var length = this.nodes[1].position.subtract(this.nodes[0].position);
-                var x = length.x;
-                var y = length.y;
-                var a = x / Math.sqrt(x * x + y * y);
-                var b = y / Math.sqrt(x * x + y * y);
-                var a2 = a * a;
-                var b2 = b * b;
-                var ab = a * b;
                 var k = CP.Mathematics.Matrix.new(4, 4);
-                k.setValue(0, 0, a2);
-                k.setValue(0, 1, ab);
-                k.setValue(0, 2, -a2);
-                k.setValue(0, 3, -ab);
-                k.setValue(1, 0, ab);
-                k.setValue(1, 1, b2);
-                k.setValue(1, 2, -ab);
-                k.setValue(1, 3, -b2);
-                k.setValue(2, 0, -a2);
-                k.setValue(2, 1, -ab);
-                k.setValue(2, 2, a2);
-                k.setValue(2, 3, ab);
-                k.setValue(3, 0, -ab);
-                k.setValue(3, 1, -b2);
-                k.setValue(3, 2, ab);
-                k.setValue(3, 3, b2);
+                k.setValue(0, 0, this.a2);
+                k.setValue(0, 1, this.ab);
+                k.setValue(0, 2, -this.a2);
+                k.setValue(0, 3, -this.ab);
+                k.setValue(1, 0, this.ab);
+                k.setValue(1, 1, this.b2);
+                k.setValue(1, 2, -this.ab);
+                k.setValue(1, 3, -this.b2);
+                k.setValue(2, 0, -this.a2);
+                k.setValue(2, 1, -this.ab);
+                k.setValue(2, 2, this.a2);
+                k.setValue(2, 3, this.ab);
+                k.setValue(3, 0, -this.ab);
+                k.setValue(3, 1, -this.b2);
+                k.setValue(3, 2, this.ab);
+                k.setValue(3, 3, this.b2);
                 return k;
             };
             TrussElement.prototype.calculateStiffnessMatrix = function () {
@@ -1391,30 +1361,59 @@ var CP;
                 return k;
             };
             TrussElement.prototype.calcualteTransformMatrix = function () {
-                var length = this.nodes[1].position.subtract(this.nodes[0].position);
-                var x = length.x;
-                var y = length.y;
-                var a = x / Math.sqrt(x * x + y * y);
-                var b = y / Math.sqrt(x * x + y * y);
                 var k = CP.Mathematics.Matrix.new(4, 4);
-                k.setValue(0, 0, a);
-                k.setValue(0, 1, b);
-                k.setValue(1, 0, -b);
-                k.setValue(1, 1, a);
-                k.setValue(2, 2, a);
-                k.setValue(2, 3, b);
-                k.setValue(3, 2, -b);
-                k.setValue(3, 3, a);
+                k.setValue(0, 0, this.a);
+                k.setValue(0, 1, this.b);
+                k.setValue(1, 0, -this.b);
+                k.setValue(1, 1, this.a);
+                k.setValue(2, 2, this.a);
+                k.setValue(2, 3, this.b);
+                k.setValue(3, 2, -this.b);
+                k.setValue(3, 3, this.a);
                 return k;
             };
             TrussElement.prototype.calcualteGlobalDisplacementMatrix = function () {
                 var globalDisplacementMatrix = CP.Mathematics.Matrix.new(this.nodes.length * 2, 1);
                 var row = 0;
                 this.nodes.forEach(function (node) {
-                    globalDisplacementMatrix.setValue(row++, 0, node.displacement.x);
-                    globalDisplacementMatrix.setValue(row++, 0, node.displacement.y);
+                    if (node.reactionDisplacement && node.reactionDisplacement.isDefined()) {
+                        globalDisplacementMatrix.setValue(row++, 0, node.reactionDisplacement.x);
+                        globalDisplacementMatrix.setValue(row++, 0, node.reactionDisplacement.y);
+                    }
+                    else if (node.displacement && node.displacement.isDefined()) {
+                        globalDisplacementMatrix.setValue(row++, 0, node.displacement.x);
+                        globalDisplacementMatrix.setValue(row++, 0, node.displacement.y);
+                    }
                 });
                 return globalDisplacementMatrix;
+            };
+            TrussElement.prototype.calculateStress = function () {
+                var displacementMatrix = this.calcualteGlobalDisplacementMatrix();
+                var transformationMatrix = this.calcualteTransformMatrix();
+                var linearMatrix = new CP.Mathematics.Matrix([-1, 1]);
+                var matrix = linearMatrix.multiply(transformationMatrix);
+                matrix = matrix.multiply(displacementMatrix);
+                return new CP.Mathematics.Value((this.material.elasticModulus.magnitude / this.length) * matrix.getValue(0, 0));
+            };
+            TrussElement.prototype.solve = function () {
+                this.stress = this.calculateStress();
+            };
+            TrussElement.prototype.render = function (ctx, options) {
+                var fillColor = new CP.Graphics.Color(100, 100, 100);
+                var lineColor = CP.Graphics.Color.black;
+                var stressColor = new CP.Graphics.Color(this.stressFactor > 0 ? this.stressFactor * 200 : 0, 0, this.stressFactor > 0 ? 0 : -this.stressFactor * 200);
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = stressColor;
+                ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
+                ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
+                ctx.stroke();
+                var middle = new CP.Mathematics.Vector3(this.nodes[0].position.x + this.vector.x / 2, this.nodes[0].position.y + this.vector.y / 2);
+                ctx.fillStyle = CP.Graphics.Color.white;
+                ctx.fillRect(middle.x - 2, middle.y - 2, 4, 4);
+                ctx.font = "3px serif";
+                ctx.fillStyle = CP.Graphics.Color.black;
+                ctx.fillText(this.number.toString(), middle.x - 1, middle.y + 1);
             };
             return TrussElement;
         })(Mechanical.Element);
@@ -1430,8 +1429,51 @@ var CP;
             __extends(TrussStructure, _super);
             function TrussStructure(dof, elements, nodes) {
                 _super.call(this, dof, elements, nodes);
-                this.dof = dof;
             }
+            TrussStructure.prototype.solve = function () {
+                _super.prototype.solve.call(this);
+                this.elements.forEach(function (x) { return x.solve(); });
+                // determine the min and max stress
+                var minStress = Math.min.apply(null, this.elements.map(function (x) { return x.stress.magnitude; }));
+                var maxStress = Math.max.apply(null, this.elements.map(function (x) { return x.stress.magnitude; }));
+                var deltaStress = maxStress - minStress;
+                // set the stress factor in each element
+                this.elements.forEach(function (x) {
+                    if (Math.abs(deltaStress) > 0)
+                        x.stressFactor = (2 * (x.stress.magnitude - minStress) / deltaStress) - 1;
+                    else
+                        x.stressFactor = 0;
+                });
+            };
+            TrussStructure.load = function (definition) {
+                var nodes = definition.nodes.map(function (e, i) {
+                    var node = new Mechanical.Node(i + 1);
+                    if (e.position) {
+                        node.position.x = e.position.x !== undefined ? e.position.x : node.position.x;
+                        node.position.y = e.position.y !== undefined ? e.position.y : node.position.y;
+                        node.position.z = e.position.z !== undefined ? e.position.z : node.position.z;
+                    }
+                    if (e.force) {
+                        node.force.x = e.force.x !== undefined ? e.force.x : node.force.x;
+                        node.force.y = e.force.y !== undefined ? e.force.y : node.force.y;
+                        node.force.z = e.force.z !== undefined ? e.force.z : node.force.z;
+                    }
+                    if (e.displacement) {
+                        node.displacement.x = e.displacement.x !== undefined ? e.displacement.x : node.displacement.x;
+                        node.displacement.y = e.displacement.y !== undefined ? e.displacement.y : node.displacement.y;
+                        node.displacement.z = e.displacement.z !== undefined ? e.displacement.z : node.displacement.z;
+                    }
+                    return node;
+                });
+                var materials = definition.materials.map(function (e) {
+                    return new Mechanical.Material(e.name, new CP.Mathematics.Value(e.elasticModulus));
+                });
+                var elements = definition.elements.map(function (e, i) {
+                    return new Mechanical.TrussElement(i + 1, materials[e.material || 0], new CP.Mathematics.Value(e.area, null), nodes[e.nodes[0]], nodes[e.nodes[1]]);
+                });
+                var structure = new TrussStructure(2, elements, nodes);
+                return structure;
+            };
             return TrussStructure;
         })(Mechanical.Structure);
         Mechanical.TrussStructure = TrussStructure;

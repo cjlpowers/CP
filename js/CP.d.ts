@@ -143,6 +143,7 @@ declare module CP.Mathematics {
         constructor(components: number[]);
         magnitude(): number;
         isZero(): boolean;
+        isDefined(): boolean;
         getComponent(n: number): number;
         protected setComponent(n: number, value: number): void;
         getDimensions(): number;
@@ -195,10 +196,10 @@ declare module CP.Mechanical {
 }
 declare module CP.Mechanical {
     class Element implements Graphics.CanvasElement {
+        number: number;
         material: Material;
         nodes: Node[];
-        number: number;
-        constructor(material: Material);
+        constructor(number: number, material: Material);
         calculateStiffnessMatrix(): Mathematics.Matrix;
         calcualteTransformMatrix(): Mathematics.Matrix;
         calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
@@ -208,8 +209,8 @@ declare module CP.Mechanical {
 }
 declare module CP.Mechanical {
     class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
-        dof: number;
-        protected elements: T[];
+        protected dof: number;
+        elements: T[];
         showElements: boolean;
         showNodes: boolean;
         constructor(dof: number, elements: T[], nodes: Node[]);
@@ -220,7 +221,6 @@ declare module CP.Mechanical {
         calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix): void;
         solve(): void;
         render(ctx: CanvasRenderingContext2D, options?: any): void;
-        static load(definition: StructureDefinition): Structure<TrussElement>;
     }
 }
 declare module CP {
@@ -246,6 +246,7 @@ declare module CP.Mathematics {
         multiply(b: Matrix): Matrix;
         scale(multiplier: number): Matrix;
         inverse(): Matrix;
+        transpose(): Matrix;
         clone(): Matrix;
         static new(rows: number, cols: number): Matrix;
         static solveAxEqualsB(a: Matrix, b: Matrix): Matrix;
@@ -275,23 +276,39 @@ declare module CP.Mechanical {
             nodes: number[];
             material?: number;
         }[];
+        materials: {
+            name: string;
+            elasticModulus: number;
+        }[];
     }
 }
 declare module CP.Mechanical {
     class TrussElement extends Element {
         area: Mathematics.Value;
+        private vector;
+        private a;
+        private b;
+        private a2;
+        private b2;
+        private ab;
+        stress: Mathematics.Value;
+        stressFactor: number;
         length: number;
         coefficient: number;
-        constructor(material: Material, area: Mathematics.Value, node1: Node, node2: Node);
+        constructor(number: number, material: Material, area: Mathematics.Value, node1: Node, node2: Node);
         calculateCoefficientMatrix(): Mathematics.Matrix;
         calculateStiffnessMatrix(): Mathematics.Matrix;
         calcualteTransformMatrix(): Mathematics.Matrix;
         calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
+        calculateStress(): Mathematics.Value;
+        solve(): void;
+        render(ctx: CanvasRenderingContext2D, options?: any): void;
     }
 }
 declare module CP.Mechanical {
     class TrussStructure extends Structure<TrussElement> {
-        dof: number;
         constructor(dof: number, elements: TrussElement[], nodes: Node[]);
+        solve(): void;
+        static load(definition: StructureDefinition): TrussStructure;
     }
 }

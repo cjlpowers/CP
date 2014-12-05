@@ -39,7 +39,6 @@ module CP.Mechanical {
         public render(ctx: CanvasRenderingContext2D, options?: any) {
             var fillColor = new Graphics.Color(100, 100, 100);
             var lineColor = new Graphics.Color(0, 0, 0);
-            var forceColor = new Graphics.Color(255, 0, 0);
             
             var size = 1;
 
@@ -52,21 +51,21 @@ module CP.Mechanical {
             ctx.strokeStyle = lineColor;
             ctx.stroke();
             ctx.fillStyle = lineColor;
-            ctx.font = "4px serif";
-            ctx.fillText(this.number.toString(), this.position.x + 2, this.position.y + 5);
+            ctx.font = "3px serif";
+            ctx.fillText(this.number.toString(), this.position.x + 1, this.position.y + 3);
 
-            this.drawForce(ctx, this.force, new Graphics.Color(0, 0, 255), 1);
-            this.drawForce(ctx, this.reactionForce, new Graphics.Color(255, 0, 0), 0.5);
+            this.drawForce(ctx, this.force, new Graphics.Color(50, 50, 50), 1);
+            this.drawForce(ctx, this.reactionForce, new Graphics.Color(0, 200, 0), 0.5);
         }
 
         drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color, width: number) {
             var forceLineLength = 10;
             if (force) {
                 if (force.x && Math.abs(force.x) > 0.00001 ) {
-                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(forceLineLength * (force.x > 0 ? -1 : 1), 0)), color, width, force.x.toString());
+                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(forceLineLength * (force.x > 0 ? 1 : -1), 0)), color, width, force.x.toString());
                 }
                 if (force.y && Math.abs(force.y) > 0.00001) {
-                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? -1 : 1))), color, width, force.y.toString());
+                    this.drawForceLine(ctx, this.position, this.position.add(new Mathematics.Vector3(0, forceLineLength * (force.y > 0 ? 1 : -1))), color, width, force.y.toString());
                 }
             }
         }

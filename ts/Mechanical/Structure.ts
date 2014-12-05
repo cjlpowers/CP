@@ -5,8 +5,8 @@ module CP.Mechanical {
         showElements: boolean = true;
         showNodes: boolean = true;
 
-        constructor(public dof: number, protected elements: Array<T>, nodes: Array<Node>) {
-            super(Material.Aluminium);
+        constructor(protected dof: number, public elements: Array<T>, nodes: Array<Node>) {
+            super(0, Material.Aluminium);
             this.nodes = nodes;
         }
 
@@ -171,39 +171,6 @@ module CP.Mechanical {
                     node.render(ctx);
                 });
             }
-        }
-
-        static load(definition: StructureDefinition) {
-            var nodes = definition.nodes.map((e, i) => {
-                var node = new Node(i+1);
-
-                if (e.position) {
-                    node.position.x = e.position.x !== undefined ? e.position.x : node.position.x;
-                    node.position.y = e.position.y !== undefined ? e.position.y : node.position.y;
-                    node.position.z = e.position.z !== undefined ? e.position.z : node.position.z;
-                }
-
-                if (e.force) {
-                    node.force.x = e.force.x !== undefined ? e.force.x : node.force.x;
-                    node.force.y = e.force.y !== undefined ? e.force.y : node.force.y;
-                    node.force.z = e.force.z !== undefined ? e.force.z : node.force.z;
-                }
-
-                if (e.displacement) {
-                    node.displacement.x = e.displacement.x !== undefined ? e.displacement.x : node.displacement.x;
-                    node.displacement.y = e.displacement.y !== undefined ? e.displacement.y : node.displacement.y;
-                    node.displacement.z = e.displacement.z !== undefined ? e.displacement.z : node.displacement.z;
-                }
-
-                return node;
-            });
-
-            var elements = definition.elements.map((e, i) => {
-                return new TrussElement(Material.Aluminium, new Mathematics.Value(e.area, null), nodes[e.nodes[0]], nodes[e.nodes[1]]);
-            });
-
-            var structure = new Structure(2, elements, nodes);
-            return structure;
         }
     }
 }

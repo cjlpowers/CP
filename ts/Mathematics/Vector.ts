@@ -17,9 +17,11 @@ module CP.Mathematics {
         }
 
         isZero() : boolean {
-            return this.components.every((value) => {
-                return value === 0;
-            });
+            return this.components.every((value) => value === 0);
+        }
+
+        isDefined(): boolean {
+            return this.components.some((value) => value !== undefined);
         }
 
         getComponent(n: number) : number {

@@ -5,10 +5,11 @@ module CP.Mathematics {
         }
 
         toString(): string {
+            var mag = Math.round(this.magnitude * 1000) / 1000
             if (this.unit)
-                return this.magnitude.toString() + ' ' + this.unit;
+                return mag.toString() + ' ' + this.unit;
             else
-                return this.magnitude.toString();
+                return mag.toString();
         }
     }
 }

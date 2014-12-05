@@ -48,6 +48,10 @@ module CP.Mathematics {
             return new Matrix(numeric.inv(this.matrix));
         }
 
+        transpose(): Matrix {
+            return new Matrix(numeric.transpose(this.matrix));
+        }
+
         clone(): Matrix {
             return this.scale(1);
         }

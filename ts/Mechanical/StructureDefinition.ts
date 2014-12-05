@@ -2,11 +2,6 @@
 
 module CP.Mechanical {
     export class StructureDefinition {
-        //materials: Array<{ 
-        //    name: string; 
-        //    elasticModulus: number 
-        //}>;
-
         nodes: Array<{ 
             force?: {
                 x?: number;
@@ -31,6 +26,11 @@ module CP.Mechanical {
             area: number;
             nodes: Array<number>;
             material?: number;
+        }>;
+
+        materials: Array<{
+            name: string;
+            elasticModulus: number 
         }>;
     }
 }
