@@ -36,7 +36,7 @@ module CP.Mechanical {
             this.reactionForce.unit = "N";
         }
 
-        public render(ctx: CanvasRenderingContext2D, options?: any) {
+        public render(ctx: CanvasRenderingContext2D, options?: IRenderOptions) {
             var fillColor = new Graphics.Color(100, 100, 100);
             var lineColor = new Graphics.Color(0, 0, 0);
             

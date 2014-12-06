@@ -114,7 +114,7 @@ module CP.Mechanical {
             this.stress = this.calculateStress();
         }
 
-        public render(ctx: CanvasRenderingContext2D, options?: any) {
+        public render(ctx: CanvasRenderingContext2D, options?: IRenderOptions) {
             var fillColor = new Graphics.Color(100, 100, 100);
             var lineColor = Graphics.Color.black;
 
@@ -123,8 +123,14 @@ module CP.Mechanical {
             ctx.beginPath();
             ctx.lineWidth = 1;
             ctx.strokeStyle = stressColor;
-            ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
-            ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
+            if (options.showDisplacement && options.displacementMultiplier) {
+                ctx.moveTo(this.nodes[0].position.x + this.nodes[0].reactionDisplacement.x * options.displacementMultiplier, this.nodes[0].position.y + this.nodes[0].reactionDisplacement.y * options.displacementMultiplier);
+                ctx.lineTo(this.nodes[1].position.x + this.nodes[1].reactionDisplacement.x * options.displacementMultiplier, this.nodes[1].position.y + this.nodes[1].reactionDisplacement.y * options.displacementMultiplier);
+            }
+            else {
+                ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
+                ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
+            }
             ctx.stroke();
 
             var middle = new Mathematics.Vector3(this.nodes[0].position.x + this.vector.x / 2, this.nodes[0].position.y + this.vector.y / 2);

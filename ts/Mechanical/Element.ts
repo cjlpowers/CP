@@ -26,7 +26,7 @@ module CP.Mechanical {
             return transformMatrix.multiply(globalDisplacementMatrix);
         }
 
-        public render(ctx: CanvasRenderingContext2D, options?: any) {
+        public render(ctx: CanvasRenderingContext2D, options?: IRenderOptions) {
             throw new Error("Not Implemented");
         }
     }

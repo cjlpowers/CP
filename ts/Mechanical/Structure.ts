@@ -105,33 +105,6 @@ module CP.Mechanical {
         }
 
         public calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix) {
-            //var rowsToRemove = new Array<number>();
-            //for (var n = 0; n < this.nodes.length; n++) {
-            //    var node = this.nodes[n];
-            //    var globalNumber = node.number - 1;
-
-            //    if (node.displacement.x === undefined)
-            //        rowsToRemove.push(globalNumber * this.dof);
-            //    if (this.dof >= 2 && node.displacement.y === undefined)
-            //        rowsToRemove.push(globalNumber * this.dof + 1);
-            //    if (this.dof >= 3 && node.displacement.z === undefined)
-            //        rowsToRemove.push(globalNumber * this.dof + 2);
-            //}
-
-            //// remove the rows
-            //var newK = Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
-
-            //var rowCount = 0;
-            //for (var r = 0; r < globalK.rowCount; r++)
-            //{
-            //    if (rowsToRemove.indexOf(r) === -1) {
-            //        for (var c = 0; c < newK.columnCount; c++)
-            //            newK.setValue(rowCount, c, globalK.getValue(r, c));
-            //        rowCount++;
-            //    }
-            //}
-
-            //var globalR = newK.multiply(globalQ);
             var globalR = globalK.multiply(globalQ);
             var rowCount = 0;
             this.nodes.forEach((node) => {
@@ -159,18 +132,29 @@ module CP.Mechanical {
             this.calculateReactionForces(globalK, globalQ);
         }
 
-        public render(ctx: CanvasRenderingContext2D, options?: any) {
-            if (this.showElements) {
+        public render(ctx: CanvasRenderingContext2D, options?: IRenderOptions) {
+            options = options || Structure.getDefaultRenderOptions();
+
+            if (options.showElements) {
                 this.elements.forEach((element) => {
-                    element.render(ctx);
+                    element.render(ctx, options);
                 });
             }
 
-            if (this.showNodes) {
+            if (options.showNodes) {
                 this.nodes.forEach((node) => {
-                    node.render(ctx);
+                    node.render(ctx, options);
                 });
             }
+        }
+
+        static getDefaultRenderOptions(): IRenderOptions {
+            return {
+                showNodes: true,
+                showElements: true,
+                showDisplacement: true,
+                displacementMultiplier: 5,
+            };
         }
     }
 }

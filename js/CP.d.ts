@@ -136,6 +136,25 @@ declare module CP.Mathematics {
     }
 }
 declare module CP.Mathematics {
+    class Matrix {
+        matrix: any;
+        rowCount: number;
+        columnCount: number;
+        constructor(matrix: any);
+        toString(): string;
+        getValue(row: number, column: number): number;
+        setValue(row: number, column: number, value: number): void;
+        addValue(row: number, column: number, value: number): void;
+        multiply(b: Matrix): Matrix;
+        scale(multiplier: number): Matrix;
+        inverse(): Matrix;
+        transpose(): Matrix;
+        clone(): Matrix;
+        static new(rows: number, cols: number): Matrix;
+        static solveAxEqualsB(a: Matrix, b: Matrix): Matrix;
+    }
+}
+declare module CP.Mathematics {
     class Vector {
         private components;
         private magnitudeValue;
@@ -189,7 +208,7 @@ declare module CP.Mechanical {
         reactionForce: Mathematics.Vector3;
         reactionDisplacement: Mathematics.Vector3;
         constructor(number: number);
-        render(ctx: CanvasRenderingContext2D, options?: any): void;
+        render(ctx: CanvasRenderingContext2D, options?: IRenderOptions): void;
         drawForce(ctx: CanvasRenderingContext2D, force: Mathematics.Vector3, color: Graphics.Color, width: number): void;
         drawForceLine(ctx: CanvasRenderingContext2D, start: Mathematics.Vector3, end: Mathematics.Vector3, color: Graphics.Color, width: number, text: string): void;
     }
@@ -204,7 +223,7 @@ declare module CP.Mechanical {
         calcualteTransformMatrix(): Mathematics.Matrix;
         calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
         calcualteLocalDisplacementMatrix(): Mathematics.Matrix;
-        render(ctx: CanvasRenderingContext2D, options?: any): void;
+        render(ctx: CanvasRenderingContext2D, options?: IRenderOptions): void;
     }
 }
 declare module CP.Mechanical {
@@ -220,7 +239,16 @@ declare module CP.Mechanical {
         calculateReactionDisplacements(globalQ: Mathematics.Matrix): void;
         calculateReactionForces(globalK: Mathematics.Matrix, globalQ: Mathematics.Matrix): void;
         solve(): void;
-        render(ctx: CanvasRenderingContext2D, options?: any): void;
+        render(ctx: CanvasRenderingContext2D, options?: IRenderOptions): void;
+        static getDefaultRenderOptions(): IRenderOptions;
+    }
+}
+declare module CP.Mechanical {
+    interface IRenderOptions {
+        showNodes?: boolean;
+        showElements?: boolean;
+        showDisplacement?: boolean;
+        displacementMultiplier?: number;
     }
 }
 declare module CP {
@@ -233,25 +261,6 @@ declare module CP {
     }
 }
 declare var numeric: any;
-declare module CP.Mathematics {
-    class Matrix {
-        matrix: any;
-        rowCount: number;
-        columnCount: number;
-        constructor(matrix: any);
-        toString(): string;
-        getValue(row: number, column: number): number;
-        setValue(row: number, column: number, value: number): void;
-        addValue(row: number, column: number, value: number): void;
-        multiply(b: Matrix): Matrix;
-        scale(multiplier: number): Matrix;
-        inverse(): Matrix;
-        transpose(): Matrix;
-        clone(): Matrix;
-        static new(rows: number, cols: number): Matrix;
-        static solveAxEqualsB(a: Matrix, b: Matrix): Matrix;
-    }
-}
 declare module CP.Mechanical {
     class StructureDefinition {
         nodes: {
@@ -302,7 +311,7 @@ declare module CP.Mechanical {
         calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
         calculateStress(): Mathematics.Value;
         solve(): void;
-        render(ctx: CanvasRenderingContext2D, options?: any): void;
+        render(ctx: CanvasRenderingContext2D, options?: IRenderOptions): void;
     }
 }
 declare module CP.Mechanical {

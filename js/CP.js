@@ -730,6 +730,80 @@ var CP;
 (function (CP) {
     var Mathematics;
     (function (Mathematics) {
+        var Matrix = (function () {
+            function Matrix(matrix) {
+                this.matrix = matrix;
+                if (!matrix) {
+                    throw new Error("Must provide a matrix");
+                }
+                this.rowCount = matrix.length;
+                this.columnCount = this.rowCount > 0 ? matrix[0].length : 0;
+            }
+            Object.defineProperty(Matrix.prototype, "rowCount", {
+                get: function () {
+                    return this.matrix.length;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Matrix.prototype, "columnCount", {
+                get: function () {
+                    return this.matrix.length > 0 ? this.matrix[0].length : 0;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Matrix.prototype.toString = function () {
+                return this.matrix.toString();
+            };
+            Matrix.prototype.getValue = function (row, column) {
+                var obj = this.matrix[row];
+                if (column === 0 && !Array.isArray(obj))
+                    return obj;
+                return obj[column];
+            };
+            Matrix.prototype.setValue = function (row, column, value) {
+                this.matrix[row][column] = value;
+            };
+            Matrix.prototype.addValue = function (row, column, value) {
+                this.setValue(row, column, this.getValue(row, column) + value);
+            };
+            Matrix.prototype.multiply = function (b) {
+                return new Matrix(numeric.dot(this.matrix, b.matrix));
+            };
+            Matrix.prototype.scale = function (multiplier) {
+                return new Matrix(numeric.mul(multiplier, this.matrix));
+            };
+            Matrix.prototype.inverse = function () {
+                return new Matrix(numeric.inv(this.matrix));
+            };
+            Matrix.prototype.transpose = function () {
+                return new Matrix(numeric.transpose(this.matrix));
+            };
+            Matrix.prototype.clone = function () {
+                return this.scale(1);
+            };
+            Matrix.new = function (rows, cols) {
+                var result = new Array(rows);
+                for (var r = 0; r < rows; r++) {
+                    result[r] = new Array(cols);
+                    for (var c = 0; c < cols; c++)
+                        result[r][c] = 0;
+                }
+                return new Matrix(result);
+            };
+            Matrix.solveAxEqualsB = function (a, b) {
+                return new CP.Mathematics.Matrix(numeric.solve(a.matrix, b.matrix));
+            };
+            return Matrix;
+        })();
+        Mathematics.Matrix = Matrix;
+    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
+})(CP || (CP = {}));
+var CP;
+(function (CP) {
+    var Mathematics;
+    (function (Mathematics) {
         var Vector = (function () {
             function Vector(components) {
                 this.components = components;
@@ -1099,30 +1173,7 @@ var CP;
                 });
             };
             Structure.prototype.calculateReactionForces = function (globalK, globalQ) {
-                //var rowsToRemove = new Array<number>();
-                //for (var n = 0; n < this.nodes.length; n++) {
-                //    var node = this.nodes[n];
-                //    var globalNumber = node.number - 1;
                 var _this = this;
-                //    if (node.displacement.x === undefined)
-                //        rowsToRemove.push(globalNumber * this.dof);
-                //    if (this.dof >= 2 && node.displacement.y === undefined)
-                //        rowsToRemove.push(globalNumber * this.dof + 1);
-                //    if (this.dof >= 3 && node.displacement.z === undefined)
-                //        rowsToRemove.push(globalNumber * this.dof + 2);
-                //}
-                //// remove the rows
-                //var newK = Mathematics.Matrix.new(globalK.rowCount - rowsToRemove.length, globalK.columnCount);
-                //var rowCount = 0;
-                //for (var r = 0; r < globalK.rowCount; r++)
-                //{
-                //    if (rowsToRemove.indexOf(r) === -1) {
-                //        for (var c = 0; c < newK.columnCount; c++)
-                //            newK.setValue(rowCount, c, globalK.getValue(r, c));
-                //        rowCount++;
-                //    }
-                //}
-                //var globalR = newK.multiply(globalQ);
                 var globalR = globalK.multiply(globalQ);
                 var rowCount = 0;
                 this.nodes.forEach(function (node) {
@@ -1146,22 +1197,32 @@ var CP;
                 this.calculateReactionForces(globalK, globalQ);
             };
             Structure.prototype.render = function (ctx, options) {
-                if (this.showElements) {
+                options = options || Structure.getDefaultRenderOptions();
+                if (options.showElements) {
                     this.elements.forEach(function (element) {
-                        element.render(ctx);
+                        element.render(ctx, options);
                     });
                 }
-                if (this.showNodes) {
+                if (options.showNodes) {
                     this.nodes.forEach(function (node) {
-                        node.render(ctx);
+                        node.render(ctx, options);
                     });
                 }
+            };
+            Structure.getDefaultRenderOptions = function () {
+                return {
+                    showNodes: true,
+                    showElements: true,
+                    showDisplacement: true,
+                    displacementMultiplier: 5,
+                };
             };
             return Structure;
         })(Mechanical.Element);
         Mechanical.Structure = Structure;
     })(Mechanical = CP.Mechanical || (CP.Mechanical = {}));
 })(CP || (CP = {}));
+/// <reference path="../Includes.ts" />
 /// <reference path="Includes.ts" />
 var CP;
 (function (CP) {
@@ -1207,7 +1268,10 @@ var CP;
     })();
     CP.Log = Log;
 })(CP || (CP = {}));
+/// <reference path="Graphics/CanvasElement.ts" />
+/// <reference path="Graphics/Color.ts" />
 /// <reference path="Mathematics/Value.ts" />
+/// <reference path="Mathematics/Matrix.ts" />
 /// <reference path="Mathematics/Vector.ts" />
 /// <reference path="Mathematics/Vector2.ts" />
 /// <reference path="Mathematics/Vector3.ts" />
@@ -1215,82 +1279,9 @@ var CP;
 /// <reference path="Mechanical/Node.ts" />
 /// <reference path="Mechanical/Element.ts" />
 /// <reference path="Mechanical/Structure.ts" />
+/// <reference path="Mechanical/IRenderOptions.ts" />
 /// <reference path="Log.ts" />
 var numeric;
-var CP;
-(function (CP) {
-    var Mathematics;
-    (function (Mathematics) {
-        var Matrix = (function () {
-            function Matrix(matrix) {
-                this.matrix = matrix;
-                if (!matrix) {
-                    throw new Error("Must provide a matrix");
-                }
-                this.rowCount = matrix.length;
-                this.columnCount = this.rowCount > 0 ? matrix[0].length : 0;
-            }
-            Object.defineProperty(Matrix.prototype, "rowCount", {
-                get: function () {
-                    return this.matrix.length;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Object.defineProperty(Matrix.prototype, "columnCount", {
-                get: function () {
-                    return this.matrix.length > 0 ? this.matrix[0].length : 0;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Matrix.prototype.toString = function () {
-                return this.matrix.toString();
-            };
-            Matrix.prototype.getValue = function (row, column) {
-                var obj = this.matrix[row];
-                if (column === 0 && !Array.isArray(obj))
-                    return obj;
-                return obj[column];
-            };
-            Matrix.prototype.setValue = function (row, column, value) {
-                this.matrix[row][column] = value;
-            };
-            Matrix.prototype.addValue = function (row, column, value) {
-                this.setValue(row, column, this.getValue(row, column) + value);
-            };
-            Matrix.prototype.multiply = function (b) {
-                return new Matrix(numeric.dot(this.matrix, b.matrix));
-            };
-            Matrix.prototype.scale = function (multiplier) {
-                return new Matrix(numeric.mul(multiplier, this.matrix));
-            };
-            Matrix.prototype.inverse = function () {
-                return new Matrix(numeric.inv(this.matrix));
-            };
-            Matrix.prototype.transpose = function () {
-                return new Matrix(numeric.transpose(this.matrix));
-            };
-            Matrix.prototype.clone = function () {
-                return this.scale(1);
-            };
-            Matrix.new = function (rows, cols) {
-                var result = new Array(rows);
-                for (var r = 0; r < rows; r++) {
-                    result[r] = new Array(cols);
-                    for (var c = 0; c < cols; c++)
-                        result[r][c] = 0;
-                }
-                return new Matrix(result);
-            };
-            Matrix.solveAxEqualsB = function (a, b) {
-                return new CP.Mathematics.Matrix(numeric.solve(a.matrix, b.matrix));
-            };
-            return Matrix;
-        })();
-        Mathematics.Matrix = Matrix;
-    })(Mathematics = CP.Mathematics || (CP.Mathematics = {}));
-})(CP || (CP = {}));
 /// <reference path="../Includes.ts" />
 var CP;
 (function (CP) {
@@ -1408,8 +1399,14 @@ var CP;
                 ctx.beginPath();
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = stressColor;
-                ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
-                ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
+                if (options.showDisplacement && options.displacementMultiplier) {
+                    ctx.moveTo(this.nodes[0].position.x + this.nodes[0].reactionDisplacement.x * options.displacementMultiplier, this.nodes[0].position.y + this.nodes[0].reactionDisplacement.y * options.displacementMultiplier);
+                    ctx.lineTo(this.nodes[1].position.x + this.nodes[1].reactionDisplacement.x * options.displacementMultiplier, this.nodes[1].position.y + this.nodes[1].reactionDisplacement.y * options.displacementMultiplier);
+                }
+                else {
+                    ctx.moveTo(this.nodes[0].position.x, this.nodes[0].position.y);
+                    ctx.lineTo(this.nodes[1].position.x, this.nodes[1].position.y);
+                }
                 ctx.stroke();
                 var middle = new CP.Mathematics.Vector3(this.nodes[0].position.x + this.vector.x / 2, this.nodes[0].position.y + this.vector.y / 2);
                 ctx.beginPath();
