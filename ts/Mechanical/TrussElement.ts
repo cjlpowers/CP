@@ -118,7 +118,7 @@ module CP.Mechanical {
             var fillColor = new Graphics.Color(100, 100, 100);
             var lineColor = Graphics.Color.black;
 
-            var stressColor = new Graphics.Color(this.stressFactor > 0 ? this.stressFactor * 200 : 0, 0, this.stressFactor > 0 ? 0 : -this.stressFactor * 200);
+            var stressColor = new Graphics.Color(this.stressFactor > 0 ? 0 : -this.stressFactor * 200, 0, this.stressFactor > 0 ? this.stressFactor * 200 : 0);
 
             ctx.beginPath();
             ctx.lineWidth = 1;

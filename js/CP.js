@@ -1395,7 +1395,7 @@ var CP;
             TrussElement.prototype.render = function (ctx, options) {
                 var fillColor = new CP.Graphics.Color(100, 100, 100);
                 var lineColor = CP.Graphics.Color.black;
-                var stressColor = new CP.Graphics.Color(this.stressFactor > 0 ? this.stressFactor * 200 : 0, 0, this.stressFactor > 0 ? 0 : -this.stressFactor * 200);
+                var stressColor = new CP.Graphics.Color(this.stressFactor > 0 ? 0 : -this.stressFactor * 200, 0, this.stressFactor > 0 ? this.stressFactor * 200 : 0);
                 ctx.beginPath();
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = stressColor;
