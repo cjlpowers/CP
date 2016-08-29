@@ -19,7 +19,7 @@ module CP.Genetics {
             return Math.abs(sensor.getValue()) >= this.triggerThreshold;
         }
 
-        getSensor(sensors: Sensor[], sensorIndex) {
+        getSensor(sensors: Sensor[], sensorIndex: number) {
             return sensors[sensorIndex % sensors.length];
         }
 

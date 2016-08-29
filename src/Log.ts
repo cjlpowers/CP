@@ -1,5 +1,4 @@
-﻿/// <reference path="Includes.ts" />
-
+﻿
 module CP {
     export class Log {
         

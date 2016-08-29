@@ -1,4 +1,5 @@
-﻿module CP.Genetics {
+﻿
+module CP.Genetics {
     
     export class PrimitiveOrganism extends Organism implements Graphics.CanvasElement {
         size: number;
@@ -115,7 +116,7 @@
             var me = this;
             for (var x = 0; x < outputSensorValues.length; x++) {
                 outputSensorValues[x] = 0;
-                (function (index) {
+                (function (index:number) {
                     var outputSensor = new Sensor(
                         () => {
                             return outputSensorValues[index];

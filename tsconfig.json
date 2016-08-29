@@ -1,0 +1,13 @@
+{
+    "exclude": [
+        "lib",
+        "node_modules"
+    ],
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "target": "es5",
+        "outFile": "CP.TypeScript.js",
+        "declaration": true,
+        "sourceMap": true
+    }
+}

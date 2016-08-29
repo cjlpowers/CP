@@ -1,5 +1,4 @@
-﻿/// <reference path="../Includes.ts" />
-
+﻿
 module CP.Mechanical {
     export class Element implements Graphics.CanvasElement {
         public nodes: Node[];

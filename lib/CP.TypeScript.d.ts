@@ -1,3 +1,12 @@
+declare module CP {
+    class Log {
+        static debug(message?: any, ...optionalParams: any[]): void;
+        static log(message?: any, ...optionalParams: any[]): void;
+        static info(message?: any, ...optionalParams: any[]): void;
+        static warn(message?: any, ...optionalParams: any[]): void;
+        static error(message?: any, ...optionalParams: any[]): void;
+    }
+}
 declare module CP.Genetics {
     class Environment<TOrganism extends Organism> {
         organisms: TOrganism[];
@@ -52,13 +61,11 @@ declare module CP.Genetics {
         constructor();
         execute(organism: PrimitiveOrganism, inputSensors: Sensor[], outputSensors: Sensor[]): void;
         isActive(inputSensors: Sensor[]): boolean;
-        getSensor(sensors: Sensor[], sensorIndex: any): Sensor;
+        getSensor(sensors: Sensor[], sensorIndex: number): Sensor;
         getRandomIndex(): number;
         normalize(value: number, min?: number, max?: number): number;
         limit(delta: number, value: number, min: number, max: number): number;
-        static AllGenes: {
-            (): PrimitiveGene;
-        }[];
+        static AllGenes: Array<() => PrimitiveGene>;
     }
 }
 declare module CP.Genetics {
@@ -106,12 +113,12 @@ declare module CP.Genetics {
     class Sensor {
         getValue: () => number;
         setValue: (value: number) => void;
-        constructor(getValue: () => number, setValue?: (number: any) => void);
+        constructor(getValue: () => number, setValue?: (number: number) => void);
     }
 }
 declare module CP.Graphics {
     interface CanvasElement {
-        render(context: CanvasRenderingContext2D, options?: any): any;
+        render(context: CanvasRenderingContext2D, options?: any): void;
     }
 }
 declare module CP.Graphics {
@@ -124,14 +131,6 @@ declare module CP.Graphics {
         static white: Color;
         private strValue;
         constructor(r: number, g: number, b: number, a?: number);
-        toString(): string;
-    }
-}
-declare module CP.Mathematics {
-    class Value {
-        magnitude: number;
-        unit: string;
-        constructor(magnitude: number, unit?: string);
         toString(): string;
     }
 }
@@ -151,22 +150,36 @@ declare module CP.Mathematics {
         transpose(): Matrix;
         clone(): Matrix;
         static new(rows: number, cols: number): Matrix;
-        static solveAxEqualsB(a: Matrix, b: Matrix): Matrix;
+        static solveAxEqualsB(a: CP.Mathematics.Matrix, b: CP.Mathematics.Matrix): CP.Mathematics.Matrix;
+    }
+}
+declare module CP.Mathematics {
+    class Value {
+        magnitude: number;
+        unit: string;
+        constructor(magnitude: number, unit?: string);
+        toString(): string;
     }
 }
 declare module CP.Mathematics {
     class Vector {
-        private components;
         private magnitudeValue;
         unit: string;
-        constructor(components: number[]);
+        private components;
+        private namedComponents;
+        private dimensions;
+        constructor(components: number[] | {
+            [key: string]: number;
+        });
         magnitude(): number;
         isZero(): boolean;
         isDefined(): boolean;
-        getComponent(n: number): number;
-        protected setComponent(n: number, value: number): void;
+        getComponent(component: string | number): number;
+        protected setComponent(component: string | number, value: number): void;
         getDimensions(): number;
         toString(): string;
+        add(vector: Vector): Vector;
+        subtract(vector: Vector): Vector;
     }
 }
 declare module CP.Mathematics {
@@ -186,6 +199,27 @@ declare module CP.Mathematics {
         z: number;
         add(vector: Vector3): Vector3;
         subtract(vector: Vector3): Vector3;
+    }
+}
+declare module CP.Mechanical {
+    class Element implements Graphics.CanvasElement {
+        number: number;
+        material: Material;
+        nodes: Node[];
+        constructor(number: number, material: Material);
+        calculateStiffnessMatrix(): Mathematics.Matrix;
+        calcualteTransformMatrix(): Mathematics.Matrix;
+        calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
+        calcualteLocalDisplacementMatrix(): Mathematics.Matrix;
+        render(ctx: CanvasRenderingContext2D, options?: IRenderOptions): void;
+    }
+}
+declare module CP.Mechanical {
+    interface IRenderOptions {
+        showNodes?: boolean;
+        showElements?: boolean;
+        showDisplacement?: boolean;
+        displacementMultiplier?: number;
     }
 }
 declare module CP.Mechanical {
@@ -214,25 +248,12 @@ declare module CP.Mechanical {
     }
 }
 declare module CP.Mechanical {
-    class Element implements Graphics.CanvasElement {
-        number: number;
-        material: Material;
-        nodes: Node[];
-        constructor(number: number, material: Material);
-        calculateStiffnessMatrix(): Mathematics.Matrix;
-        calcualteTransformMatrix(): Mathematics.Matrix;
-        calcualteGlobalDisplacementMatrix(): Mathematics.Matrix;
-        calcualteLocalDisplacementMatrix(): Mathematics.Matrix;
-        render(ctx: CanvasRenderingContext2D, options?: IRenderOptions): void;
-    }
-}
-declare module CP.Mechanical {
     class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
         protected dof: number;
-        elements: T[];
+        elements: Array<T>;
         showElements: boolean;
         showNodes: boolean;
-        constructor(dof: number, elements: T[], nodes: Node[]);
+        constructor(dof: number, elements: Array<T>, nodes: Array<Node>);
         calculateStiffnessMatrix(): Mathematics.Matrix;
         calculateForceMatrix(): Mathematics.Matrix;
         calculateDisplacementMatrix(globalK: Mathematics.Matrix, globalF: Mathematics.Matrix): Mathematics.Matrix;
@@ -244,26 +265,8 @@ declare module CP.Mechanical {
     }
 }
 declare module CP.Mechanical {
-    interface IRenderOptions {
-        showNodes?: boolean;
-        showElements?: boolean;
-        showDisplacement?: boolean;
-        displacementMultiplier?: number;
-    }
-}
-declare module CP {
-    class Log {
-        static debug(message?: any, ...optionalParams: any[]): void;
-        static log(message?: any, ...optionalParams: any[]): void;
-        static info(message?: any, ...optionalParams: any[]): void;
-        static warn(message?: any, ...optionalParams: any[]): void;
-        static error(message?: any, ...optionalParams: any[]): void;
-    }
-}
-declare var numeric: any;
-declare module CP.Mechanical {
     class StructureDefinition {
-        nodes: {
+        nodes: Array<{
             force?: {
                 x?: number;
                 y?: number;
@@ -279,16 +282,16 @@ declare module CP.Mechanical {
                 y?: number;
                 z?: number;
             };
-        }[];
-        elements: {
+        }>;
+        elements: Array<{
             area: number;
-            nodes: number[];
+            nodes: Array<number>;
             material?: number;
-        }[];
-        materials: {
+        }>;
+        materials: Array<{
             name: string;
             elasticModulus: number;
-        }[];
+        }>;
     }
 }
 declare module CP.Mechanical {
@@ -304,7 +307,7 @@ declare module CP.Mechanical {
         stressFactor: number;
         length: number;
         coefficient: number;
-        constructor(number: number, material: Material, area: Mathematics.Value, node1: Node, node2: Node);
+        constructor(number: number, material: Mechanical.Material, area: Mathematics.Value, node1: Node, node2: Node);
         calculateCoefficientMatrix(): Mathematics.Matrix;
         calculateStiffnessMatrix(): Mathematics.Matrix;
         calcualteTransformMatrix(): Mathematics.Matrix;
@@ -316,7 +319,7 @@ declare module CP.Mechanical {
 }
 declare module CP.Mechanical {
     class TrussStructure extends Structure<TrussElement> {
-        constructor(dof: number, elements: TrussElement[], nodes: Node[]);
+        constructor(dof: number, elements: Array<TrussElement>, nodes: Array<Node>);
         solve(): void;
         static load(definition: StructureDefinition): TrussStructure;
     }

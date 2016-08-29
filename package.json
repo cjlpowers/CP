@@ -1,12 +1,18 @@
 {
-  "name": "CP",
+  "name": "cp.typescript",
   "version": "1.0.0",
-  "author": "Chris Powers",
+  "description": "",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^2.13.6",
+    "typings": "^1.3.2"
+  },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-watch": "",
-    "grunt-typescript": "",
-    "typescript": "",
-    "mathjs"
- : ""  }
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^2.13.6",
+    "typings": "^1.3.2",
+    "mathjs": ""
+  },
+  "author": "Chris Powers"
 }

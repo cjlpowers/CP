@@ -1,5 +1,4 @@
-﻿/// <reference path="../Includes.ts" />
-
+﻿
 module CP.Mechanical {
     export class Material {
         public static Aluminium = new Material("Aluminium", new Mathematics.Value(69, "GPa"));

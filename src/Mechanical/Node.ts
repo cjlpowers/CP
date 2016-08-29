@@ -1,5 +1,4 @@
-﻿/// <reference path="../Includes.ts" />
-
+﻿
 module CP.Mechanical {
     export class Node implements Graphics.CanvasElement {
         public force: Mathematics.Vector3;

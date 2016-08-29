@@ -3,15 +3,21 @@ module CP.Mathematics {
     export class Vector2 extends Vector {
 
         constructor(x: number = 0, y: number= 0) {
-            super([x, y]);
+            super({"x":x, "y":y});
         }
 
         get x(): number {
-            return this.getComponent(0);
+            return this.getComponent("x");
+        }
+        set x(value:number) {
+            this.setComponent("x", value);
         }
 
         get y(): number {
-            return this.getComponent(1);
+            return this.getComponent("y");
+        }
+        set y(value:number) {
+            this.setComponent("y", value);
         }
 
         add(vector: Vector2) : Vector2 {

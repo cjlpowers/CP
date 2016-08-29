@@ -1,5 +1,4 @@
-﻿/// <reference path="../Includes.ts" />
-
+﻿
 module CP.Mechanical {
     export class TrussElement extends Element {
         private vector: Mathematics.Vector3;

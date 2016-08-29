@@ -1,5 +1,6 @@
 ﻿
 module CP.Mathematics {
+    var numeric: any;
     export class Matrix {
         get rowCount(): number {
             return this.matrix.length;

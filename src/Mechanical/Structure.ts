@@ -1,5 +1,4 @@
-﻿/// <reference path="../Includes.ts" />
-
+﻿
 module CP.Mechanical {
     export class Structure<T extends Element> extends Element implements Graphics.CanvasElement {
         showElements: boolean = true;
@@ -108,7 +107,7 @@ module CP.Mechanical {
             var globalR = globalK.multiply(globalQ);
             var rowCount = 0;
             this.nodes.forEach((node) => {
-                var x, y, z = undefined;
+                var x: any, y: any, z: any = undefined;
 
                 if (this.dof >= 1)
                     x = globalR.getValue(rowCount++, 0);

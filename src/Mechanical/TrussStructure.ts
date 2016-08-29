@@ -1,5 +1,4 @@
-﻿/// <reference path="../Includes.ts" />
-
+﻿
 module CP.Mechanical {
     export class TrussStructure extends Structure<TrussElement>{
         constructor(dof: number, elements: Array<TrussElement>, nodes: Array<Node>) {
