@@ -1,8 +1,3 @@
-# CP Library
+# CP.TypeScript
 
-Library of various TypeScript files
-
-## Build script
-	var test = 1;
-
-Click [this link](ts/README.md) 
+A TypeScript class library.
